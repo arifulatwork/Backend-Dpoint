@@ -15,7 +15,7 @@ class DestinationController extends Controller
 
     public function show($id)
     {
-        $destination = Destination::findOrFail($id);
+        $destination = Destination::with(['pointsOfInterest', 'attractions.guide'])->findOrFail($id);
         return response()->json($destination);
     }
 }
