@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TripController;
 use App\Http\Controllers\AccommodationOfferController;
 use App\Http\Controllers\DestinationController;
+use App\Http\Controllers\ExperienceController;
 
 
 /*
@@ -27,6 +28,11 @@ Route::get('/destinations/{id}', [DestinationController::class, 'show']);
 Route::get('/trips', [TripController::class, 'index']);
 Route::get('/trips/{id}', [TripController::class, 'show']);
 Route::get('/accommodation-offers', [AccommodationOfferController::class, 'index']);
+
+
+//Local Touch Attraction
+
+Route::apiResource('experiences', ExperienceController::class);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
