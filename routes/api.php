@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TripController;
+use App\Http\Controllers\TripCategoryController;
 use App\Http\Controllers\AccommodationOfferController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\ExperienceController;
@@ -25,9 +26,16 @@ Route::controller(DestinationController::class)->group(function () {
     Route::get('/destinations/{id}', 'show');
 });
 
+// Trips Public Routes
 Route::controller(TripController::class)->group(function () {
     Route::get('/trips', 'index');
     Route::get('/trips/{id}', 'show');
+});
+
+// Trip Categories Public Routes
+Route::controller(TripCategoryController::class)->group(function () {
+    Route::get('/trip-categories', 'index');
+    Route::get('/trip-categories/{id}', 'show');
 });
 
 Route::get('/accommodation-offers', [AccommodationOfferController::class, 'index']);
@@ -41,7 +49,7 @@ Route::controller(ExperienceController::class)->group(function () {
 // Authentication Routes
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']); // Changed from GET to POST
+    Route::post('/login', [AuthController::class, 'login']);
     
     // Protected Routes
     Route::middleware('auth:sanctum')->group(function () {
@@ -57,7 +65,18 @@ Route::prefix('auth')->group(function () {
             Route::delete('/experiences/{id}', 'destroy');
         });
         
-        // Other protected routes can be added here
-        // Route::apiResource('trips', TripController::class)->except(['index', 'show']);
+        // Protected Trip Routes
+        Route::controller(TripController::class)->group(function () {
+            Route::post('/trips', 'store');
+            Route::put('/trips/{id}', 'update');
+            Route::delete('/trips/{id}', 'destroy');
+        });
+        
+        // Protected Trip Category Routes
+        Route::controller(TripCategoryController::class)->group(function () {
+            Route::post('/trip-categories', 'store');
+            Route::put('/trip-categories/{id}', 'update');
+            Route::delete('/trip-categories/{id}', 'destroy');
+        });
     });
 });

@@ -13,6 +13,9 @@ class DatabaseSeeder extends Seeder
             PointsOfInterestTableSeeder::class,
             AttractionsTableSeeder::class,
             GuidesTableSeeder::class,
+            TripCategorySeeder::class,
+            TripSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }
