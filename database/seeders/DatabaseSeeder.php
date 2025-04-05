@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             TripSeeder::class,
             UserSeeder::class,
             AdminSeeder::class,
+            ExperienceSeeder::class,
         ]);
     }
 }
