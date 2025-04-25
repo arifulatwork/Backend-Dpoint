@@ -18,6 +18,9 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             AdminSeeder::class,
             ExperienceSeeder::class,
+            PremiumTiersSeeder::class,
+            SpecialDiscountsSeeder::class,
+            RealEstatePropertiesSeeder::class,
         ]);
     }
 }

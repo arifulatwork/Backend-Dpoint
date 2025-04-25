@@ -8,6 +8,7 @@ use App\Http\Controllers\AccommodationOfferController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PremiumController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,6 +45,14 @@ Route::get('/accommodation-offers', [AccommodationOfferController::class, 'index
 Route::controller(ExperienceController::class)->group(function () {
     Route::get('/experiences', 'index');
     Route::get('/experiences/{id}', 'show');
+});
+
+// Premium Routes (Public)
+Route::controller(PremiumController::class)->prefix('premium')->group(function () {
+    Route::get('/benefits', 'getBenefits');
+    Route::get('/tiers', 'getPricingTiers');
+    Route::get('/discounts', 'getSpecialDiscounts');
+    Route::get('/properties', 'getRealEstateProperties');
 });
 
 // Authentication Routes
