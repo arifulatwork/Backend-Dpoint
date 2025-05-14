@@ -27,9 +27,31 @@ class ExperienceSeeder extends Seeder
                     'rating' => 4.9,
                     'reviews' => 245,
                     'image' => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&h=120&q=80'
+                ]),
+                'highlights' => json_encode([
+                    'Authentic family recipe passed down for generations',
+                    'Fresh ingredients from La Boqueria market',
+                    'Enjoy your creation with local wines'
+                ]),
+                'why_choose' => json_encode([
+                    [
+                        'icon' => 'Award', // You can later map 'Award' to a real icon in frontend
+                        'title' => "Award-Winning Chef",
+                        'description' => "Learn from a chef featured in Spain's top culinary magazines"
+                    ],
+                    [
+                        'icon' => 'Leaf',
+                        'title' => "Farm-to-Table",
+                        'description' => "Ingredients sourced directly from local producers"
+                    ],
+                    [
+                        'icon' => 'Wine',
+                        'title' => "Wine Pairing",
+                        'description' => "Includes tasting of 3 regional wines with your meal"
+                    ]
                 ])
             ],
-            // Add more experiences as needed...
+            // You can add more experiences here...
         ];
 
         foreach ($experiences as $experience) {

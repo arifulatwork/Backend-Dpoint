@@ -25,6 +25,8 @@ return new class extends Migration
             $table->string('image');
             $table->string('city');
             $table->json('host'); // Store host details as JSON
+            $table->json('highlights')->nullable(); // New field
+            $table->json('why_choose')->nullable(); // New field
             $table->timestamps();
         });
     }
