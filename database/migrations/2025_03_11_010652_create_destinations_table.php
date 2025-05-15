@@ -16,8 +16,15 @@ return new class extends Migration
             $table->string('country');
             $table->string('city');
             $table->string('image');
-            $table->json('highlights'); // Store as JSON
-            $table->json('cuisine');   // Store as JSON
+
+            $table->decimal('latitude', 10, 7)->nullable();   // NEW: for mapping
+            $table->decimal('longitude', 10, 7)->nullable();  // NEW: for mapping
+
+            $table->enum('visit_type', ['individual', 'group', 'company'])->default('individual'); // NEW: visit type
+
+            $table->json('highlights')->nullable(); // JSON highlights (optional)
+            $table->json('cuisine')->nullable();    // JSON cuisine (optional)
+
             $table->timestamps();
         });
     }
