@@ -15,8 +15,7 @@ class PointOfInterest extends Model
         'destination_id',
         'name',
         'type',
-        'latitude',
-        'longitude',
+        'position',
         'description',
         'image',
         'rating',
@@ -28,6 +27,7 @@ class PointOfInterest extends Model
     ];
 
     protected $casts = [
+        'position' => 'array',
         'latitude' => 'float',
         'longitude' => 'float',
         'amenities' => 'array',

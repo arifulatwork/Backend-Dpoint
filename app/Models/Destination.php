@@ -13,18 +13,23 @@ class Destination extends Model
         'country',
         'city',
         'image',
+        'coordinates',
         'latitude',
         'longitude',
         'visit_type',
         'highlights',
         'cuisine',
+        'description',
+        'max_price',
     ];
 
     protected $casts = [
+        'coordinates' => 'array',
         'highlights' => 'array',
         'cuisine' => 'array',
         'latitude' => 'float',
         'longitude' => 'float',
+        'max_price' => 'float',
     ];
 
     public function pointsOfInterest()
