@@ -66,6 +66,24 @@ Route::prefix('auth')->group(function () {
         Route::get('/user', function (Request $request) {
             return $request->user();
         });
+        use App\Http\Controllers\CreditCardController;
+use App\Http\Controllers\UserPreferenceController;
+
+// Inside existing 'auth:sanctum' middleware group:
+Route::middleware('auth:sanctum')->group(function () {
+
+    // 💳 Credit Card Routes
+    Route::get('/credit-cards', [CreditCardController::class, 'index']);
+    Route::post('/credit-cards', [CreditCardController::class, 'store']);
+    Route::put('/credit-cards/{id}/default', [CreditCardController::class, 'setDefault']);
+    Route::delete('/credit-cards/{id}', [CreditCardController::class, 'destroy']);
+
+    // 🎯 Travel Persona (User Preferences)
+    Route::get('/user-preferences', [UserPreferenceController::class, 'show']);
+    Route::post('/user-preferences', [UserPreferenceController::class, 'store']);
+    Route::put('/user-preferences', [UserPreferenceController::class, 'update']);
+});
+
         
         // Protected Experience Routes
         Route::controller(ExperienceController::class)->group(function () {
