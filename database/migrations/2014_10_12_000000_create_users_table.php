@@ -18,7 +18,9 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->integer('age');
-            $table->json('interests')->nullable();
+            $table->json('interests')->nullable(); // Optional: array of user interests
+            $table->string('avatar_url')->nullable(); // For profile picture
+            $table->string('location')->nullable(); // User location
             $table->rememberToken();
             $table->timestamps();
         });

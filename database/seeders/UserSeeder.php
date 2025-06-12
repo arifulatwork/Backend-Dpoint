@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Schema; // Add this import
+use Illuminate\Support\Facades\Schema;
 
 class UserSeeder extends Seeder
 {
@@ -14,16 +14,18 @@ class UserSeeder extends Seeder
     {
         // Create admin user
         $adminData = [
-            'first_name' => 'Admin',
-            'last_name' => 'User',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password123'),
-            'age' => 30,
-            'interests' => ['Cities', 'Food'],
+            'first_name'     => 'Admin',
+            'last_name'      => 'User',
+            'email'          => 'admin@example.com',
+            'password'       => Hash::make('password123'),
+            'age'            => 30,
+            'interests'      => ['Cities', 'Food'],
+            'avatar_url'     => 'https://ui-avatars.com/api/?name=Admin+User',
+            'location'       => 'Paris',
             'remember_token' => Str::random(10),
         ];
 
-        // Only add email_verified_at if column exists
+        // Optional email_verified_at
         if (Schema::hasColumn('users', 'email_verified_at')) {
             $adminData['email_verified_at'] = now();
         }
@@ -33,7 +35,7 @@ class UserSeeder extends Seeder
             $adminData
         );
 
-        // Create regular users
+        // Create 10 regular users using factory
         User::factory(10)->create();
 
         $this->command->info('Users seeded successfully!');
