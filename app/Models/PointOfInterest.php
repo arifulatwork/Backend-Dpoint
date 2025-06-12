@@ -27,12 +27,10 @@ class PointOfInterest extends Model
     ];
 
     protected $casts = [
-        'position' => 'array',
-        'latitude' => 'float',
-        'longitude' => 'float',
-        'amenities' => 'array',
-        'flight_details' => 'array',
-        'shuttle_details' => 'array',
+    'position' => 'array',
+    'amenities' => 'array',
+    'flight_details' => 'array',
+    'shuttle_details' => 'array',
     ];
 
     public function destination()
