@@ -60,4 +60,31 @@ class User extends Authenticatable
     return $this->hasMany(Subscription::class);
     }
 
+
+
+    // Netowork and chat
+
+    // Connections
+        public function connectionsSent()
+        {
+            return $this->hasMany(Connection::class, 'requester_id');
+        }
+
+        public function connectionsReceived()
+        {
+            return $this->hasMany(Connection::class, 'receiver_id');
+        }
+
+        // Messages
+        public function messagesSent()
+        {
+            return $this->hasMany(Message::class, 'sender_id');
+        }
+
+        public function messagesReceived()
+        {
+            return $this->hasMany(Message::class, 'receiver_id');
+        }
+
+
     }

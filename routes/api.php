@@ -12,6 +12,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PremiumController;
 use App\Http\Controllers\CreditCardController;
 use App\Http\Controllers\UserPreferenceController;
+use App\Http\Controllers\NetworkController;
 
 /*
 |--------------------------------------------------------------------------
@@ -98,6 +99,27 @@ Route::prefix('auth')->group(function () {
             Route::get('/user-preferences', 'show');
             Route::post('/user-preferences', 'store');
             Route::put('/user-preferences', 'update');
+        });
+
+        // ✅ Network and Messaging Routes
+        Route::controller(NetworkController::class)->group(function () {
+            // 🔍 Find users to connect with
+            Route::get('/network/users', 'index');
+
+            // 🤝 Send a connection request
+            Route::post('/network/request', 'sendConnectionRequest');
+
+            // ✅ Respond to a connection request (accept/reject)
+            Route::post('/network/request/respond/{id}', 'respondToRequest');
+
+            // 👥 Get all your accepted connections
+            Route::get('/network/connections', 'myConnections');
+
+            // 💬 Get all messages with a specific user
+            Route::get('/messages/{userId}', 'getMessages');
+
+            // ✉️ Send a message
+            Route::post('/messages/send', 'sendMessage');
         });
     });
 });
