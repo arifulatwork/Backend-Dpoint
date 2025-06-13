@@ -25,7 +25,6 @@ class UserSeeder extends Seeder
             'remember_token' => Str::random(10),
         ];
 
-        // Optional email_verified_at
         if (Schema::hasColumn('users', 'email_verified_at')) {
             $adminData['email_verified_at'] = now();
         }
@@ -33,6 +32,28 @@ class UserSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'admin@example.com'],
             $adminData
+        );
+
+        // Add another specific user
+        $specificUser = [
+            'first_name'     => 'John',
+            'last_name'      => 'Doe',
+            'email'          => 'john.doe@example.com',
+            'password'       => Hash::make('secret123'),
+            'age'            => 28,
+            'interests'      => ['Nature', 'Art'],
+            'avatar_url'     => 'https://ui-avatars.com/api/?name=John+Doe',
+            'location'       => 'Madrid',
+            'remember_token' => Str::random(10),
+        ];
+
+        if (Schema::hasColumn('users', 'email_verified_at')) {
+            $specificUser['email_verified_at'] = now();
+        }
+
+        User::updateOrCreate(
+            ['email' => 'john.doe@example.com'],
+            $specificUser
         );
 
         // Create 10 regular users using factory
