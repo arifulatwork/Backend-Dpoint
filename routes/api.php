@@ -13,6 +13,7 @@ use App\Http\Controllers\PremiumController;
 use App\Http\Controllers\CreditCardController;
 use App\Http\Controllers\UserPreferenceController;
 use App\Http\Controllers\NetworkController;
+use App\Http\Controllers\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -93,6 +94,9 @@ Route::prefix('auth')->group(function () {
             Route::put('/credit-cards/{id}/default', 'setDefault');
             Route::delete('/credit-cards/{id}', 'destroy');
         });
+
+        // Payment Routes
+        Route::post('/payments/charge', [PaymentController::class, 'charge']);
 
         // ✅ User Preferences Routes (Travel Persona)
         Route::controller(UserPreferenceController::class)->group(function () {

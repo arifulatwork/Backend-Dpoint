@@ -14,13 +14,18 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+
+            // Enum with standardized values
             $table->enum('status', ['pending', 'succeeded', 'failed', 'refunded'])->default('pending');
+
             $table->string('payment_gateway'); // e.g., stripe, paypal
             $table->string('transaction_id')->nullable();
             $table->decimal('amount', 10, 2);
             $table->string('currency', 10)->default('USD');
+
             $table->enum('purpose', ['trip', 'premium', 'experience', 'real_estate', 'other']);
             $table->json('metadata')->nullable();
+
             $table->timestamps();
         });
     }
