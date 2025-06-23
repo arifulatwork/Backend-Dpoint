@@ -8,6 +8,7 @@ class Subscription extends Model
 {
     protected $fillable = [
         'user_id',
+        'payment_id', // ✅ Add this line
         'premium_tier_id',
         'gateway_subscription_id',
         'status',
@@ -25,5 +26,10 @@ class Subscription extends Model
     public function premiumTier()
     {
         return $this->belongsTo(PremiumTier::class);
+    }
+
+    public function payment()
+    {
+        return $this->belongsTo(Payment::class);
     }
 }

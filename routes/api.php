@@ -14,6 +14,7 @@ use App\Http\Controllers\CreditCardController;
 use App\Http\Controllers\UserPreferenceController;
 use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SubscriptionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,6 +67,9 @@ Route::prefix('auth')->group(function () {
             return $request->user();
         });
 
+        // Subscription Routes
+        Route::post('/subscriptions', [SubscriptionController::class, 'store']);
+
         // Protected Experience Routes
         Route::controller(ExperienceController::class)->group(function () {
             Route::post('/experiences', 'store');
@@ -97,6 +101,7 @@ Route::prefix('auth')->group(function () {
 
         // Payment Routes
         Route::post('/payments/charge', [PaymentController::class, 'charge']);
+        
 
         // ✅ User Preferences Routes (Travel Persona)
         Route::controller(UserPreferenceController::class)->group(function () {

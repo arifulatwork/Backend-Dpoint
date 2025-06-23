@@ -62,6 +62,7 @@ class PremiumController extends Controller
                 ->get()
                 ->map(function ($tier) {
                     return [
+                         'id' => $tier->id,
                         'name' => $tier->name,
                         'price' => $tier->price,
                         'period' => $tier->period,
