@@ -13,7 +13,9 @@ class NetworkController extends Controller
     // 1. Get all users for networking (with optional filters)
     public function index(Request $request)
     {
-        $query = User::query()->where('id', '!=', Auth::id());
+        $authId = Auth::id();
+
+        $query = User::query()->where('id', '!=', $authId);
 
         if ($request->has('location')) {
             $query->where('location', $request->location);
@@ -28,7 +30,33 @@ class NetworkController extends Controller
             });
         }
 
-        return response()->json($query->get());
+        $users = $query->get();
+
+        // Attach connection status
+        $users = $users->map(function ($user) use ($authId) {
+            $connection = Connection::where(function ($q) use ($authId, $user) {
+                $q->where('requester_id', $authId)
+                  ->where('receiver_id', $user->id);
+            })->orWhere(function ($q) use ($authId, $user) {
+                $q->where('requester_id', $user->id)
+                  ->where('receiver_id', $authId);
+            })->first();
+
+            if (!$connection) {
+                $status = 'none';
+            } elseif ($connection->status === 'pending') {
+                $status = 'pending';
+            } elseif ($connection->status === 'accepted') {
+                $status = 'connected';
+            } else {
+                $status = 'none'; // You can return 'rejected' or 'blocked' if needed
+            }
+
+            $user->connection_status = $status;
+            return $user;
+        });
+
+        return response()->json($users);
     }
 
     // 2. Send a connection request
@@ -73,7 +101,7 @@ class NetworkController extends Controller
         return response()->json($connection);
     }
 
-    // 4. Get all your connections
+    // 4. Get all your accepted connections
     public function myConnections()
     {
         $userId = Auth::id();
@@ -89,21 +117,23 @@ class NetworkController extends Controller
         return response()->json($connections);
     }
 
-    // 5. Get chat messages with a user
+    // 5. Get chat messages with a specific user
     public function getMessages($userId)
     {
         $authId = Auth::id();
 
         $messages = Message::where(function ($q) use ($authId, $userId) {
-            $q->where('sender_id', $authId)->where('receiver_id', $userId);
+            $q->where('sender_id', $authId)
+              ->where('receiver_id', $userId);
         })->orWhere(function ($q) use ($authId, $userId) {
-            $q->where('sender_id', $userId)->where('receiver_id', $authId);
+            $q->where('sender_id', $userId)
+              ->where('receiver_id', $authId);
         })->orderBy('created_at')->get();
 
         return response()->json($messages);
     }
 
-    // 6. Send a message
+    // 6. Send a new message
     public function sendMessage(Request $request)
     {
         $request->validate([
