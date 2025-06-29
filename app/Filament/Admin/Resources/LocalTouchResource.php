@@ -111,7 +111,8 @@ class LocalTouchResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
-                    ->square(),
+                ->disk('public')
+                ->square(),
                     
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
