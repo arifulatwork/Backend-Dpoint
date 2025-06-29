@@ -32,7 +32,7 @@ class TripResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('category_id')
                             ->label('Category')
-                            ->options(TripCategory::all()->pluck('name', 'id'))
+                            ->relationship('category', 'name')
                             ->searchable()
                             ->required(),
                             
@@ -81,7 +81,8 @@ class TripResource extends Resource
                                     
                                 Forms\Components\TextInput::make('max_participants')
                                     ->numeric()
-                                    ->minValue(1),
+                                    ->minValue(1)
+                                    ->nullable(),
                             ]),
                     ]),
                     
@@ -91,37 +92,43 @@ class TripResource extends Resource
                             ->schema([
                                 Forms\Components\TextInput::make('item')
                                     ->required(),
-                            ]),
+                            ])
+                            ->default([]),
                             
                         Repeater::make('learning_outcomes')
                             ->schema([
                                 Forms\Components\TextInput::make('item')
                                     ->required(),
-                            ]),
+                            ])
+                            ->default([]),
                             
                         Repeater::make('personal_development')
                             ->schema([
                                 Forms\Components\TextInput::make('item')
                                     ->required(),
-                            ]),
+                            ])
+                            ->default([]),
                             
                         Repeater::make('certifications')
                             ->schema([
                                 Forms\Components\TextInput::make('item')
                                     ->required(),
-                            ]),
+                            ])
+                            ->default([]),
                             
                         Repeater::make('environmental_impact')
                             ->schema([
                                 Forms\Components\TextInput::make('item')
                                     ->required(),
-                            ]),
+                            ])
+                            ->default([]),
                             
                         Repeater::make('community_benefits')
                             ->schema([
                                 Forms\Components\TextInput::make('item')
                                     ->required(),
-                            ]),
+                            ])
+                            ->default([]),
                     ])
                     ->columns(1),
             ]);
@@ -132,8 +139,10 @@ class TripResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('image_url')
+                    ->disk('public')
                     ->square()
-                    ->size(50),
+                    ->size(50)
+                    ->defaultImageUrl('https://via.placeholder.com/50'),
                     
                 Tables\Columns\TextColumn::make('title')
                     ->searchable()
