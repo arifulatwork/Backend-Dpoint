@@ -15,6 +15,7 @@ use App\Http\Controllers\UserPreferenceController;
 use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\LocalTouchBookingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,6 +67,10 @@ Route::prefix('auth')->group(function () {
         Route::get('/user', function (Request $request) {
             return $request->user();
         });
+
+        Route::controller(LocalTouchBookingController::class)->prefix('localtouch')->group(function () {
+    Route::post('/book', 'bookAndPay'); // booking + create Stripe payment intent
+});
 
         // Subscription Routes
         Route::post('/subscriptions', [SubscriptionController::class, 'store']);

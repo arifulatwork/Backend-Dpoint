@@ -84,4 +84,9 @@ class Experience extends Model
     {
         return $query->where('type', 'craft');
     }
-}
+
+    public function bookings()
+    {
+    return $this->hasMany(LocalTouchBooking::class);
+    }
+    }

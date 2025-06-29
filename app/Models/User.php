@@ -87,4 +87,23 @@ class User extends Authenticatable
         }
 
 
+        /**
+         * A user can make many local touch bookings.
+         */
+        public function localTouchBookings()
+        {
+            return $this->hasMany(LocalTouchBooking::class);
+        }
+
+        /**
+         * A user can have many local touch payments (via bookings).
+         * This is optional if you're accessing payment through bookings.
+         */
+        public function localTouchPayments()
+        {
+            return $this->hasManyThrough(LocalTouchPayment::class, LocalTouchBooking::class);
+        }
+
+
+
     }
