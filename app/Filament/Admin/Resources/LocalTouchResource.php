@@ -86,6 +86,38 @@ class LocalTouchResource extends Resource
                             ->required()
                             ->maxLength(255),
                             
+                        // Highlights Repeater
+                        Forms\Components\Repeater::make('highlights')
+    ->schema([
+        Forms\Components\TextInput::make('value')
+            ->label('Highlight')
+            ->required(),
+    ])
+    ->label('Highlights')
+    ->default([]),
+
+                            
+                        // Why Choose Repeater
+                        Forms\Components\Repeater::make('why_choose')
+                            ->label('Why Choose This Experience')
+                            ->schema([
+                                Forms\Components\Select::make('icon')
+                                    ->options([
+                                        'Award' => 'Award',
+                                        'Leaf' => 'Leaf',
+                                        'Wine' => 'Wine',
+                                        'Heart' => 'Heart',
+                                        'Star' => 'Star',
+                                        'Shield' => 'Shield',
+                                    ])
+                                    ->required(),
+                                Forms\Components\TextInput::make('title')
+                                    ->required(),
+                                Forms\Components\Textarea::make('description')
+                                    ->required(),
+                            ])
+                            ->default([]),
+                            
                         Forms\Components\Fieldset::make('Host Information')
                             ->schema([
                                 Forms\Components\TextInput::make('host.name')
@@ -111,8 +143,8 @@ class LocalTouchResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
-                ->disk('public')
-                ->square(),
+                    ->disk('public')
+                    ->square(),
                     
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()

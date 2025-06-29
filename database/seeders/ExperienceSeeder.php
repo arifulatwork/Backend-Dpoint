@@ -22,20 +22,20 @@ class ExperienceSeeder extends Seeder
                 'max_participants' => 8,
                 'image' => 'https://images.unsplash.com/photo-1534080564583-6be75777b70a?auto=format&fit=crop&w=800&q=80',
                 'city' => 'Barcelona',
-                'host' => json_encode([
+                'host' => [
                     'name' => 'Chef Maria',
                     'rating' => 4.9,
                     'reviews' => 245,
                     'image' => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&h=120&q=80'
-                ]),
-                'highlights' => json_encode([
-                    'Authentic family recipe passed down for generations',
-                    'Fresh ingredients from La Boqueria market',
-                    'Enjoy your creation with local wines'
-                ]),
-                'why_choose' => json_encode([
+                ],
+                'highlights' => [
+                    ['value' => 'Authentic family recipe passed down for generations'],
+                    ['value' => 'Fresh ingredients from La Boqueria market'],
+                    ['value' => 'Enjoy your creation with local wines'],
+                ],
+                'why_choose' => [
                     [
-                        'icon' => 'Award', // You can later map 'Award' to a real icon in frontend
+                        'icon' => 'Award',
                         'title' => "Award-Winning Chef",
                         'description' => "Learn from a chef featured in Spain's top culinary magazines"
                     ],
@@ -49,9 +49,8 @@ class ExperienceSeeder extends Seeder
                         'title' => "Wine Pairing",
                         'description' => "Includes tasting of 3 regional wines with your meal"
                     ]
-                ])
+                ]
             ],
-            // You can add more experiences here...
         ];
 
         foreach ($experiences as $experience) {
