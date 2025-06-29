@@ -87,4 +87,11 @@ class ExperienceController extends Controller
         Experience::destroy($id);
         return response()->json(null, 204);
     }
+
+
+    public function bookings()
+    {
+    return $this->hasMany(LocalTouchBooking::class);
+    }
+
 }

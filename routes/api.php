@@ -69,7 +69,8 @@ Route::prefix('auth')->group(function () {
         });
 
         Route::controller(LocalTouchBookingController::class)->prefix('localtouch')->group(function () {
-    Route::post('/book', 'bookAndPay'); // booking + create Stripe payment intent
+        Route::post('/book', 'bookAndPay'); // booking + create Stripe payment intent
+     Route::get('/experiences', 'experiencesWithBookingStatus');
 });
 
         // Subscription Routes
