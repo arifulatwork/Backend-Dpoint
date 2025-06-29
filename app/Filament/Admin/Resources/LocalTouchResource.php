@@ -23,7 +23,7 @@ class LocalTouchResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Local Touches';
 
-    protected static ?string $navigationGroup = 'Explore II Local Touch';
+    protected static ?string $navigationGroup = 'Local Touch';
 
     protected static ?int $navigationSort = 2;
 
