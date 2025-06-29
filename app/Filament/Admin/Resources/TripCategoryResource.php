@@ -18,7 +18,7 @@ class TripCategoryResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';
 
-    protected static ?string $navigationGroup = 'Explore';
+    protected static ?string $navigationGroup = 'Short Trips & Excursions';
 
     protected static ?int $navigationSort = 1;
 

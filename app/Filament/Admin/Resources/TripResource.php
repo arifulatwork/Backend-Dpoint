@@ -20,7 +20,7 @@ class TripResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-globe';
 
-    protected static ?string $navigationGroup = 'Explore';
+    protected static ?string $navigationGroup = 'Short Trips & Excursions';
 
     protected static ?int $navigationSort = 2;
 
