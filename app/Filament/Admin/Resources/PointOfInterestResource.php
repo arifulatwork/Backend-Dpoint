@@ -28,7 +28,7 @@ class PointOfInterestResource extends Resource
     protected static ?string $navigationLabel = 'Points of Interest';
     protected static ?string $pluralModelLabel = 'Points of Interest';
     protected static ?string $modelLabel = 'Point of Interest';
-    protected static ?string $navigationGroup = 'Explore I Trips';
+    protected static ?string $navigationGroup = 'Destinations';
 
     public static function form(Form $form): Form
     {
