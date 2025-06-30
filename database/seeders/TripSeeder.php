@@ -11,9 +11,9 @@ class TripSeeder extends Seeder
     {
         $trips = [
             [
+                'slug' => 'mediterranean-yoga-retreat',
                 'category_id' => 1,
                 'title' => 'Mediterranean Yoga Retreat',
-                'slug' => 'mediterranean-yoga-retreat',
                 'description' => 'A transformative yoga and meditation retreat along the Mediterranean coast. Rejuvenate your body and mind.',
                 'price' => 599,
                 'original_price' => 749,
@@ -22,12 +22,54 @@ class TripSeeder extends Seeder
                 'duration_days' => 3,
                 'max_participants' => 16,
 
-                // JSON-compatible arrays
                 'highlights' => [
-                    ['item' => 'Sunrise yoga sessions'],
-                    ['item' => 'Seaside meditation'],
-                    ['item' => 'Organic vegetarian meals'],
+                    [
+                        'day' => 1,
+                        'activities' => [
+                            [
+                                'time' => '07:00',
+                                'activity' => 'Sunrise Yoga',
+                                'description' => 'Start the day with a gentle yoga session on the beach.'
+                            ],
+                            [
+                                'time' => '09:00',
+                                'activity' => 'Seaside Meditation',
+                                'description' => 'Guided mindfulness meditation by the sea.'
+                            ]
+                        ]
+                    ],
+                    [
+                        'day' => 2,
+                        'activities' => [
+                            [
+                                'time' => '08:00',
+                                'activity' => 'Breathwork Workshop',
+                                'description' => 'Learn focused breathing techniques for stress relief.'
+                            ],
+                            [
+                                'time' => '11:00',
+                                'activity' => 'Organic Lunch',
+                                'description' => 'Enjoy a healthy plant-based meal sourced locally.'
+                            ]
+                        ]
+                    ],
+                    [
+                        'day' => 3,
+                        'activities' => [
+                            [
+                                'time' => '06:30',
+                                'activity' => 'Morning Walk',
+                                'description' => 'Light walk along the scenic coastline.'
+                            ],
+                            [
+                                'time' => '10:00',
+                                'activity' => 'Closing Circle',
+                                'description' => 'Reflection session and certificate distribution.'
+                            ]
+                        ]
+                    ]
                 ],
+
                 'learning_outcomes' => [
                     ['item' => 'Improved flexibility and breathing'],
                     ['item' => 'Mindfulness and focus techniques'],
@@ -54,7 +96,10 @@ class TripSeeder extends Seeder
         ];
 
         foreach ($trips as $trip) {
-            Trip::create($trip);
+            Trip::updateOrCreate(
+                ['slug' => $trip['slug']],
+                $trip
+            );
         }
     }
 }
