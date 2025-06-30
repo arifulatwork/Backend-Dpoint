@@ -81,7 +81,16 @@ Route::prefix('auth')->group(function () {
     Route::post('/payment/create', 'createPaymentIntent'); // Create Stripe Payment Intent
     Route::post('/payment/confirm', 'confirmPayment');     // Confirm Payment
     Route::get('/trip/booked', 'bookedTrips');
-});
+    });
+
+    //Destination PaymentBook
+    Route::controller(App\Http\Controllers\AttractionBookingController::class)
+    ->prefix('attraction')->group(function () {
+        Route::post('/book/{id}', 'book');
+        Route::post('/payment/create', 'createPaymentIntent');
+        Route::post('/payment/confirm', 'confirmPayment');
+    });
+
 
 
         // Subscription Routes
