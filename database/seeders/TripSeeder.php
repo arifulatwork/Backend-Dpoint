@@ -11,18 +11,18 @@ class TripSeeder extends Seeder
     {
         $trips = [
             [
-                'category_id' => 1, // Example: Yoga category
+                'category_id' => 1,
                 'title' => 'Mediterranean Yoga Retreat',
                 'slug' => 'mediterranean-yoga-retreat',
                 'description' => 'A transformative yoga and meditation retreat along the Mediterranean coast. Rejuvenate your body and mind.',
                 'price' => 599,
                 'original_price' => 749,
                 'discount_percentage' => 20,
-                'image_url' => 'trip-images/mediterranean-yoga.jpg', // Relative path for FileUpload field
+                'image_url' => 'trip-images/mediterranean-yoga.jpg',
                 'duration_days' => 3,
                 'max_participants' => 16,
 
-                // ✅ JSON fields as PHP arrays, not JSON strings
+                // JSON-compatible arrays
                 'highlights' => [
                     ['item' => 'Sunrise yoga sessions'],
                     ['item' => 'Seaside meditation'],
@@ -51,7 +51,6 @@ class TripSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            // ✅ Add more trips in this same format if needed
         ];
 
         foreach ($trips as $trip) {
