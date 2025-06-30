@@ -14,23 +14,50 @@ class TripBookingController extends Controller
 {
     // ✅ Book a trip (creates a booking record)
     public function book(Request $request, $slug)
-    {
-        $trip = Trip::where('slug', $slug)->firstOrFail();
+{
+    $trip = Trip::where('slug', $slug)->firstOrFail();
+    $userId = Auth::id();
 
-        $booking = TripBooking::create([
-            'trip_id' => $trip->id,
-            'user_id' => Auth::id(),
-            'participants' => $request->input('participants', 1),
-            'booking_date' => now(),
-            'status' => 'pending',
-        ]);
+    // ✅ Check if already booked and paid
+    $alreadyBooked = TripBooking::where('user_id', $userId)
+        ->where('trip_id', $trip->id)
+        ->where('status', 'paid') // Optional: Only block if already paid
+        ->exists();
 
+    if ($alreadyBooked) {
         return response()->json([
-            'message' => 'Booking created',
-            'booking_id' => $booking->id,
-            'amount' => $trip->price,
-        ]);
+            'message' => 'Trip already booked and paid'
+        ], 409); // HTTP 409 Conflict
     }
+
+    // 🆕 Optionally check if there's a pending booking already
+    $existingPending = TripBooking::where('user_id', $userId)
+        ->where('trip_id', $trip->id)
+        ->where('status', 'pending')
+        ->first();
+
+    if ($existingPending) {
+        return response()->json([
+            'message' => 'You already have a pending booking. Complete payment.'
+        ], 409);
+    }
+
+    // ✅ Create a new booking
+    $booking = TripBooking::create([
+        'trip_id' => $trip->id,
+        'user_id' => $userId,
+        'participants' => $request->input('participants', 1),
+        'booking_date' => now(),
+        'status' => 'pending',
+    ]);
+
+    return response()->json([
+        'message' => 'Booking created',
+        'booking_id' => $booking->id,
+        'amount' => $trip->price,
+    ]);
+}
+
 
     // ✅ Create Stripe Payment Intent
     public function createPaymentIntent(Request $request)
@@ -79,4 +106,21 @@ class TripBookingController extends Controller
 
         return response()->json(['message' => 'Payment confirmed']);
     }
+
+
+    // ✅ Return all slugs of trips that the user has already paid for
+    public function bookedTrips()
+    {
+        $userId = Auth::id();
+
+        $bookedTripSlugs = Trip::whereIn('id', function ($query) use ($userId) {
+            $query->select('trip_id')
+                ->from('trip_bookings')
+                ->where('user_id', $userId)
+                ->where('status', 'paid');
+        })->pluck('slug');
+
+        return response()->json($bookedTripSlugs);
+    }
+
 }

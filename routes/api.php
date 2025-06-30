@@ -80,6 +80,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/{slug}/book', 'book'); // Book the trip
     Route::post('/payment/create', 'createPaymentIntent'); // Create Stripe Payment Intent
     Route::post('/payment/confirm', 'confirmPayment');     // Confirm Payment
+    Route::get('/trip/booked', 'bookedTrips');
 });
 
 
