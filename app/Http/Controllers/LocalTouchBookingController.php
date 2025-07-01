@@ -83,16 +83,20 @@ public function bookAndPay(Request $request)
 public function experiencesWithBookingStatus()
 {
     $user = Auth::user();
-    $experiences = Experience::all();
+    $experiences = Experience::with(['bookings' => function ($query) use ($user) {
+        $query->where('user_id', $user->id)->whereDate('date', '>=', Carbon::today());
+    }])->get();
 
     $result = $experiences->map(function ($experience) use ($user) {
-        $hasBooking = $experience->bookings()
-            ->where('user_id', $user->id)
-            ->whereDate('date', '>=', Carbon::today())
-            ->exists();
+        $userBooking = $experience->bookings->first(); // may be null
 
         return array_merge($experience->toArray(), [
-            'user_has_booking' => $hasBooking,
+            'user_has_booking' => !!$userBooking,
+            'user_booking_details' => $userBooking ? [
+                'date' => $userBooking->date,
+                'time' => $userBooking->time,
+                'participants' => $userBooking->participants,
+            ] : null,
         ]);
     });
 
