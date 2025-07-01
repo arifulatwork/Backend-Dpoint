@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\BalkanTripController;
 use App\Http\Controllers\TripController;
 use App\Http\Controllers\TripCategoryController;
 use App\Http\Controllers\AccommodationOfferController;
@@ -34,6 +34,10 @@ Route::controller(DestinationController::class)->group(function () {
     Route::get('/destinations', 'index');
     Route::get('/destinations/{id}', 'show');
 });
+
+
+Route::get('/balkan-trips', [BalkanTripController::class, 'index']);
+Route::get('/balkan-trips/{slug}', [BalkanTripController::class, 'show']);
 
 Route::controller(TripController::class)->group(function () {
     Route::get('/trips', 'index');
