@@ -16,9 +16,9 @@ class BalkanTripSeeder extends Seeder
             'duration' => '15',
             'price' => 2499.00,
             'image_url' => 'https://images.unsplash.com/photo-1592486058517-36236ba247c8?auto=format&fit=crop&w=800&q=80',
-            'destinations' => json_encode(['Albania', 'North Macedonia', 'Greece']),
-            'group_size' => json_encode(['min' => 4, 'max' => 12]),
-            'itinerary' => json_encode([
+            'destinations' => ['Albania', 'North Macedonia', 'Greece'], // Direct array
+            'group_size' => ['min' => 4, 'max' => 12], // Direct array
+            'itinerary' => [ // Direct array
                 [
                     'day' => 1,
                     'title' => 'Arrival in Tirana',
@@ -47,8 +47,8 @@ class BalkanTripSeeder extends Seeder
                     'meals' => ['Breakfast', 'Lunch'],
                     'accommodation' => 'Hotel in Kalambaka'
                 ]
-            ]),
-            'included' => json_encode([
+            ],
+            'included' => [
                 'All accommodations in 4-star hotels',
                 'Professional English-speaking guide',
                 'Private transportation',
@@ -56,15 +56,15 @@ class BalkanTripSeeder extends Seeder
                 'All entrance fees',
                 'Airport transfers',
                 'Local experiences and cultural activities'
-            ]),
-            'not_included' => json_encode([
+            ],
+            'not_included' => [
                 'International flights',
                 'Travel insurance',
                 'Personal expenses',
                 'Optional activities',
                 'Gratuities',
                 'Visa fees (if applicable)'
-            ])
+            ]
         ]);
     }
 }
