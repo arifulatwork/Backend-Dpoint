@@ -80,12 +80,13 @@ Route::prefix('auth')->group(function () {
         });
 
         // ✅ Trip Booking and Payment Routes
-    Route::controller(TripBookingController::class)->prefix('trip')->group(function () {
-    Route::post('/{slug}/book', 'book'); // Book the trip
-    Route::post('/payment/create', 'createPaymentIntent'); // Create Stripe Payment Intent
-    Route::post('/payment/confirm', 'confirmPayment');     // Confirm Payment
-    Route::get('/trip/booked', 'bookedTrips');
-    });
+        Route::controller(TripBookingController::class)->prefix('trip')->group(function () {
+        Route::post('/{slug}/book', 'book'); // Book the trip
+        Route::post('/payment/create', 'createPaymentIntent'); // Create Stripe Payment Intent
+        Route::post('/payment/confirm', 'confirmPayment');     // Confirm Payment
+        Route::get('/trip/booked', 'bookedTrips');
+        Route::get('/{slug}/booking-details', 'bookingDetails'); // ✅ NEW: fetch booking details
+        });
 
     //Destination PaymentBook
     Route::controller(App\Http\Controllers\AttractionBookingController::class)

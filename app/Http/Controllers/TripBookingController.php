@@ -123,4 +123,34 @@ class TripBookingController extends Controller
         return response()->json($bookedTripSlugs);
     }
 
+    // Add to TripBookingController
+        public function bookingDetails($slug)
+        {
+            $userId = Auth::id();
+
+            $trip = Trip::where('slug', $slug)->firstOrFail();
+
+            $booking = TripBooking::where('user_id', $userId)
+                ->where('trip_id', $trip->id)
+                ->where('status', 'paid')
+                ->with('trip') // eager load trip
+                ->latest()
+                ->first();
+
+            if (!$booking) {
+                return response()->json(['message' => 'No paid booking found'], 404);
+            }
+
+            return response()->json([
+                'booking_id' => $booking->id,
+                'trip_title' => $booking->trip->title,
+                'participants' => $booking->participants,
+                'booking_date' => $booking->booking_date,
+                'meeting_point' => $booking->trip->meeting_point ?? '',
+                'duration_days' => $booking->trip->duration_days,
+                'price' => $booking->trip->price,
+            ]);
+        }
+
+
 }
