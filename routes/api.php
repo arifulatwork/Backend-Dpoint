@@ -94,6 +94,7 @@ Route::prefix('auth')->group(function () {
         Route::post('/book/{id}', 'book');
         Route::post('/payment/create', 'createPaymentIntent');
         Route::post('/payment/confirm', 'confirmPayment');
+        Route::get('/my-bookings', 'myBookings');
     });
 
 

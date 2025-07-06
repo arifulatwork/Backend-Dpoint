@@ -12,14 +12,31 @@ use Stripe\PaymentIntent;
 
 class AttractionBookingController extends Controller
 {
-    // 🟢 Step 1: Create Booking
+    // 🟢 Step 1: Create Booking with duplicate check
     public function book(Request $request, $attractionId)
     {
+        $userId = Auth::id();
         $attraction = Attraction::findOrFail($attractionId);
 
+        // 🛑 Prevent duplicate paid booking
+        $existingBooking = AttractionBooking::where('user_id', $userId)
+            ->where('attraction_id', $attraction->id)
+            ->where('status', 'paid')
+            ->first();
+
+        if ($existingBooking) {
+            return response()->json([
+                'message' => 'Attraction already booked and paid for.',
+                'booking_id' => $existingBooking->id,
+                'amount' => $attraction->price,
+                'already_paid' => true,
+            ], 200);
+        }
+
+        // ✅ Proceed to book
         $booking = AttractionBooking::create([
             'attraction_id' => $attraction->id,
-            'user_id' => Auth::id(),
+            'user_id' => $userId,
             'participants' => $request->input('participants', 1),
             'booking_date' => now(),
             'status' => 'pending',
@@ -29,6 +46,7 @@ class AttractionBookingController extends Controller
             'message' => 'Booking created',
             'booking_id' => $booking->id,
             'amount' => $attraction->price,
+            'already_paid' => false,
         ]);
     }
 
@@ -70,5 +88,16 @@ class AttractionBookingController extends Controller
         $booking->update(['status' => 'paid']);
 
         return response()->json(['message' => 'Payment confirmed and saved']);
+    }
+
+    // 🔹 Get User's Booked Attractions
+    public function myBookings()
+    {
+        $bookings = AttractionBooking::with('attraction')
+            ->where('user_id', Auth::id())
+            ->where('status', 'paid')
+            ->get();
+
+        return response()->json($bookings);
     }
 }
