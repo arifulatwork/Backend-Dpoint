@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\PremiumPaymentDetailResource\Pages;
 use App\Models\Payment;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Resources\Resource;
@@ -26,8 +27,11 @@ class PremiumPaymentDetailResource extends Resource
     {
         return $form->schema([
             Forms\Components\Select::make('user_id')
-                ->relationship('user', 'name')
-                ->disabled(),
+                ->label('User')
+                ->disabled()
+                ->getOptionLabelUsing(fn ($value) =>
+                    User::find($value)?->first_name . ' ' . User::find($value)?->last_name
+                ),
 
             Forms\Components\TextInput::make('payment_gateway')->disabled(),
             Forms\Components\TextInput::make('transaction_id')->disabled(),
@@ -55,9 +59,17 @@ class PremiumPaymentDetailResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('user.name')->label('User')->searchable(),
+
+                Tables\Columns\TextColumn::make('user_full_name')
+                    ->label('User')
+                    ->getStateUsing(fn ($record) =>
+                        $record->user?->first_name . ' ' . $record->user?->last_name
+                    )
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('amount')->sortable(),
                 Tables\Columns\TextColumn::make('currency'),
+
                 Tables\Columns\BadgeColumn::make('status')
                     ->colors([
                         'primary' => 'pending',
@@ -65,6 +77,7 @@ class PremiumPaymentDetailResource extends Resource
                         'danger' => 'failed',
                         'warning' => 'refunded',
                     ]),
+
                 Tables\Columns\TextColumn::make('metadata.tier_id')->label('Tier ID'),
                 Tables\Columns\TextColumn::make('transaction_id')->limit(20),
                 Tables\Columns\TextColumn::make('created_at')->since(),
