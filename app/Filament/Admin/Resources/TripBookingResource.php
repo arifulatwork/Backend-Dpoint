@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\TripBookingResource\Pages;
 use App\Models\TripBooking;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
@@ -32,10 +33,19 @@ class TripBookingResource extends Resource
                 ->searchable(),
 
             Select::make('user_id')
-                ->relationship('user', 'name')
                 ->label('User')
+                ->searchable()
                 ->required()
-                ->searchable(),
+                ->getSearchResultsUsing(function (string $search) {
+                    return User::where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->limit(20)
+                        ->get()
+                        ->mapWithKeys(fn ($user) => [
+                            $user->id => $user->first_name . ' ' . $user->last_name
+                        ]);
+                })
+                ->getOptionLabelUsing(fn ($value): ?string => User::find($value)?->first_name . ' ' . User::find($value)?->last_name),
 
             TextInput::make('participants')
                 ->required()
@@ -60,10 +70,19 @@ class TripBookingResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('id')->sortable(),
+
                 TextColumn::make('trip.title')->label('Trip'),
-                TextColumn::make('user.name')->label('User'),
+
+                TextColumn::make('user_full_name')
+                    ->label('User')
+                    ->getStateUsing(fn ($record) =>
+                        $record->user?->first_name . ' ' . $record->user?->last_name
+                    ),
+
                 TextColumn::make('participants')->label('Participants'),
+
                 TextColumn::make('booking_date')->date()->label('Booking Date'),
+
                 BadgeColumn::make('status')
                     ->enum([
                         'pending' => 'Pending',
@@ -75,6 +94,7 @@ class TripBookingResource extends Resource
                         'success' => 'paid',
                         'danger' => 'cancelled',
                     ]),
+
                 TextColumn::make('created_at')->dateTime(),
             ])
             ->filters([])
