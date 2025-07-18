@@ -67,6 +67,8 @@ Route::controller(PremiumController::class)->prefix('premium')->group(function (
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    // 🔐 Add this below login/register, still outside Sanctum
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLink']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
