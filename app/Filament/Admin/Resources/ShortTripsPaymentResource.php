@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\ShortTripsPaymentResource\Pages;
 use App\Models\TripPayment;
+use App\Models\TripBooking;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -16,7 +17,7 @@ use Filament\Tables\Columns\TextColumn;
 
 class ShortTripsPaymentResource extends Resource
 {
-   protected static ?string $model = TripPayment::class;
+    protected static ?string $model = TripPayment::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-cash';
     protected static ?string $navigationGroup = 'Short Trips & Excursions';
@@ -26,10 +27,25 @@ class ShortTripsPaymentResource extends Resource
     {
         return $form->schema([
             Select::make('booking_id')
-                ->relationship('booking', 'id')
-                ->label('Booking ID')
+                ->label('Booking')
+                ->searchable()
                 ->required()
-                ->searchable(),
+                ->getSearchResultsUsing(function (string $search) {
+                    return TripBooking::with('user')
+                        ->whereHas('user', function ($query) use ($search) {
+                            $query->where('first_name', 'like', "%{$search}%")
+                                  ->orWhere('last_name', 'like', "%{$search}%");
+                        })
+                        ->get()
+                        ->mapWithKeys(fn ($booking) => [
+                            $booking->id => 'Booking #' . $booking->id . ' - ' .
+                                $booking->user?->first_name . ' ' . $booking->user?->last_name
+                        ]);
+                })
+                ->getOptionLabelUsing(fn ($value): ?string => optional(
+                    TripBooking::with('user')->find($value)
+                )?->user?->first_name . ' ' .
+                    optional(TripBooking::with('user')->find($value))->user?->last_name),
 
             TextInput::make('stripe_payment_intent_id')
                 ->label('Stripe Payment Intent ID')
@@ -60,10 +76,22 @@ class ShortTripsPaymentResource extends Resource
     {
         return $table->columns([
             TextColumn::make('id')->sortable()->label('ID'),
+
+            TextColumn::make('user_full_name')
+                ->label('User')
+                ->getStateUsing(fn ($record) =>
+                    $record->booking?->user?->first_name . ' ' . $record->booking?->user?->last_name
+                )
+                ->searchable(),
+
             TextColumn::make('booking.id')->label('Booking ID'),
+
             TextColumn::make('stripe_payment_intent_id')->label('Stripe Intent ID'),
+
             TextColumn::make('amount')->money('usd')->label('Amount'),
+
             TextColumn::make('currency')->label('Currency'),
+
             BadgeColumn::make('status')
                 ->enum([
                     'pending' => 'Pending',
@@ -76,6 +104,7 @@ class ShortTripsPaymentResource extends Resource
                     'danger' => 'failed',
                 ])
                 ->label('Status'),
+
             TextColumn::make('created_at')->dateTime()->sortable(),
         ])
         ->filters([])
