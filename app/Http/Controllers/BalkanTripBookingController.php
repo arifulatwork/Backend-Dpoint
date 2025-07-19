@@ -21,12 +21,27 @@ class BalkanTripBookingController extends Controller
                 'balkan_trip_id' => 'required|exists:balkan_trips,id',
             ]);
 
-            $user = $request->user(); // Authenticated user via Sanctum
+            $user = $request->user();
             if (!$user) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
-            $trip = BalkanTrip::findOrFail($request->balkan_trip_id);
+            $tripId = $request->balkan_trip_id;
+
+            // ✅ Prevent duplicate booking
+            $existing = BalkanTripBooking::where('user_id', $user->id)
+                ->where('balkan_trip_id', $tripId)
+                ->where('paid', true)
+                ->first();
+
+            if ($existing) {
+                return response()->json([
+                    'message' => 'You have already booked this trip.',
+                    'already_booked' => true
+                ], 200);
+            }
+
+            $trip = BalkanTrip::findOrFail($tripId);
 
             Stripe::setApiKey(env('STRIPE_SECRET'));
 
@@ -82,7 +97,7 @@ class BalkanTripBookingController extends Controller
     }
 
     /**
-     * Get all bookings of the authenticated user (optional helper route)
+     * Get all PAID trip IDs of the authenticated user
      */
     public function myBookings()
     {
@@ -92,9 +107,12 @@ class BalkanTripBookingController extends Controller
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
-            $bookings = BalkanTripBooking::with('balkanTrip')->where('user_id', $user->id)->get();
+            // Return only IDs of trips already booked and paid
+            $tripIds = BalkanTripBooking::where('user_id', $user->id)
+                ->where('paid', true)
+                ->pluck('balkan_trip_id');
 
-            return response()->json($bookings);
+            return response()->json($tripIds);
         } catch (\Exception $e) {
             \Log::error('Fetching bookings failed:', ['message' => $e->getMessage()]);
             return response()->json(['error' => 'Could not fetch bookings.'], 500);
