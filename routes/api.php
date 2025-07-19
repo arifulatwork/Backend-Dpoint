@@ -133,6 +133,8 @@ Route::prefix('auth')->group(function () {
 
         // Subscription Routes
         Route::post('/subscriptions', [SubscriptionController::class, 'store']);
+        Route::get('/subscriptions/status', [SubscriptionController::class, 'status']);
+
 
         // Protected Experience Routes
         Route::controller(ExperienceController::class)->group(function () {
