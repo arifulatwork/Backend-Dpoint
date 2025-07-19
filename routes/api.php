@@ -18,6 +18,8 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\LocalTouchBookingController;
 use App\Http\Controllers\TripBookingController;
 use App\Http\Controllers\BalkanTripBookingController;
+use App\Http\Controllers\PetraTourBookingController;
+use App\Http\Controllers\MontenegroTourBookingController;
 
 
 /*
@@ -108,6 +110,24 @@ Route::prefix('auth')->group(function () {
         Route::post('/payment/confirm', 'confirmPayment');
         Route::get('/my-bookings', 'myBookings');
         Route::get('/auth/balkan-trip/booking/{id}','show');
+    });
+
+    Route::controller(MontenegroTourBookingController::class)
+    ->prefix('montenegro-tour')
+    ->group(function () {
+        Route::post('/book', 'createPaymentIntent');
+        Route::post('/payment/confirm', 'confirmPayment');
+        Route::get('/my-bookings', 'myBookings');
+        Route::get('/auth/montenegro-tour/booking/{id}', 'show');
+    });
+
+    Route::controller(PetraTourBookingController::class)
+    ->prefix('petra-tour')
+    ->group(function () {
+        Route::post('/book', 'createPaymentIntent');
+        Route::post('/payment/confirm', 'confirmPayment');
+        Route::get('/my-bookings', 'myBookings');
+        Route::get('/auth/petra-tour/booking/{id}', 'show');
     });
 
 
