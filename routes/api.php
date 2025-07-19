@@ -17,6 +17,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\LocalTouchBookingController;
 use App\Http\Controllers\TripBookingController;
+use App\Http\Controllers\BalkanTripBookingController;
 
 
 /*
@@ -99,6 +100,14 @@ Route::prefix('auth')->group(function () {
         Route::get('/my-bookings', 'myBookings');
     });
 
+
+   Route::controller(BalkanTripBookingController::class)
+    ->prefix('balkan-trip')
+    ->group(function () {
+        Route::post('/book', 'createPaymentIntent');
+        Route::post('/payment/confirm', 'confirmPayment');
+        Route::get('/my-bookings', 'myBookings');
+    });
 
 
         // Subscription Routes
