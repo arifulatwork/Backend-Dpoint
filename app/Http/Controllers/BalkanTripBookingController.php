@@ -79,9 +79,12 @@ class BalkanTripBookingController extends Controller
         try {
             $request->validate([
                 'payment_intent_id' => 'required|string',
+                'booking_id' => 'required|integer',
             ]);
 
-            $booking = BalkanTripBooking::where('stripe_payment_intent_id', $request->payment_intent_id)->first();
+            $booking = BalkanTripBooking::where('stripe_payment_intent_id', $request->payment_intent_id)
+                ->where('id', $request->booking_id)
+                ->first();
 
             if (!$booking) {
                 return response()->json(['message' => 'Booking not found.'], 404);
@@ -107,7 +110,6 @@ class BalkanTripBookingController extends Controller
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
-            // Return only IDs of trips already booked and paid
             $tripIds = BalkanTripBooking::where('user_id', $user->id)
                 ->where('paid', true)
                 ->pluck('balkan_trip_id');
@@ -116,6 +118,33 @@ class BalkanTripBookingController extends Controller
         } catch (\Exception $e) {
             \Log::error('Fetching bookings failed:', ['message' => $e->getMessage()]);
             return response()->json(['error' => 'Could not fetch bookings.'], 500);
+        }
+    }
+
+    /**
+     * Show details of a specific booking (authenticated user only)
+     */
+    public function show($id)
+    {
+        try {
+            $booking = BalkanTripBooking::with(['user', 'balkanTrip'])
+                ->where('id', $id)
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
+
+            return response()->json([
+                'id' => $booking->id,
+                'trip_title' => $booking->balkanTrip->title,
+                'user_name' => $booking->user->first_name . ' ' . $booking->user->last_name,
+                'stripe_payment_intent_id' => $booking->stripe_payment_intent_id,
+                'paid' => $booking->paid,
+                'created_at' => $booking->created_at,
+                'meeting_point' => $booking->balkanTrip->meeting_point ?? 'TBA',
+                'note' => 'Call Marta',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Booking details fetch error:', ['message' => $e->getMessage()]);
+            return response()->json(['error' => 'Could not retrieve booking details.'], 500);
         }
     }
 }

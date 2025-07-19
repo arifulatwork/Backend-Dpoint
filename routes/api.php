@@ -107,6 +107,7 @@ Route::prefix('auth')->group(function () {
         Route::post('/book', 'createPaymentIntent');
         Route::post('/payment/confirm', 'confirmPayment');
         Route::get('/my-bookings', 'myBookings');
+        Route::get('/auth/balkan-trip/booking/{id}','show');
     });
 
 
