@@ -49,7 +49,7 @@ class NetworkController extends Controller
             } elseif ($connection->status === 'accepted') {
                 $status = 'connected';
             } else {
-                $status = 'none'; // You can return 'rejected' or 'blocked' if needed
+                $status = 'none'; // Could handle 'rejected'/'blocked' here if needed
             }
 
             $user->connection_status = $status;
@@ -59,7 +59,7 @@ class NetworkController extends Controller
         return response()->json($users);
     }
 
-    // 2. Send a connection request
+    // 2. Send a connection request (now auto-accepted)
     public function sendConnectionRequest(Request $request)
     {
         $request->validate([
@@ -72,13 +72,13 @@ class NetworkController extends Controller
         ])->first();
 
         if ($existing) {
-            return response()->json(['message' => 'Connection request already sent'], 409);
+            return response()->json(['message' => 'Connection already exists'], 409);
         }
 
         $connection = Connection::create([
             'requester_id' => Auth::id(),
             'receiver_id' => $request->receiver_id,
-            'status' => 'pending',
+            'status' => 'accepted', // ✅ Auto-accept connection
         ]);
 
         return response()->json($connection);
