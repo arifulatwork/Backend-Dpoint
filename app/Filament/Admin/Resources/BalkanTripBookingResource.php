@@ -22,7 +22,7 @@ class BalkanTripBookingResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-collection';
     protected static ?string $navigationGroup = 'Trips Management';
-    protected static ?string $navigationLabel = 'Trip Bookings';
+    protected static ?string $navigationLabel = 'Balkan Trip Bookings';
 
     public static function form(Form $form): Form
     {
