@@ -20,6 +20,7 @@ use App\Http\Controllers\TripBookingController;
 use App\Http\Controllers\BalkanTripBookingController;
 use App\Http\Controllers\PetraTourBookingController;
 use App\Http\Controllers\MontenegroTourBookingController;
+use App\Http\Controllers\NotificationController;
 
 
 /*
@@ -129,6 +130,11 @@ Route::prefix('auth')->group(function () {
         Route::get('/my-bookings', 'myBookings');
         Route::get('/auth/petra-tour/booking/{id}', 'show');
     });
+
+
+    // Notification
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications', [NotificationController::class, 'store']);
 
 
         // Subscription Routes
