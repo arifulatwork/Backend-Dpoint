@@ -18,7 +18,7 @@ class GuideResource extends Resource
     protected static ?string $navigationLabel = 'Guides';
     protected static ?string $pluralModelLabel = 'Guides';
     protected static ?string $modelLabel = 'Guide';
-    protected static ?string $navigationGroup = 'Content';
+    protected static ?string $navigationGroup = 'Destinations';
 
     public static function form(Form $form): Form
     {
