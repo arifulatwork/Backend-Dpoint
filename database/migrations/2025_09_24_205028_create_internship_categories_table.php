@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('internship_categories', function (Blueprint $table) {
             $table->id();
+             $table->string('slug', 64)->unique();   // e.g. it, management, marketing
+            $table->string('name', 120)->index();   // e.g. Information Technology
+            $table->string('icon', 100)->nullable();// optional (lucide icon name)
             $table->timestamps();
         });
     }

@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             SpecialDiscountsSeeder::class,
             RealEstatePropertiesSeeder::class,
             BalkanTripSeeder::class,
+            InternshipMarketplaceSeeder::class,
         ]);
     }
 }

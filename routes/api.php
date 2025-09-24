@@ -21,6 +21,7 @@ use App\Http\Controllers\BalkanTripBookingController;
 use App\Http\Controllers\PetraTourBookingController;
 use App\Http\Controllers\MontenegroTourBookingController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\InternshipController;
 
 
 /*
@@ -37,6 +38,12 @@ use App\Http\Controllers\NotificationController;
 Route::controller(DestinationController::class)->group(function () {
     Route::get('/destinations', 'index');
     Route::get('/destinations/{id}', 'show');
+});
+
+Route::prefix('internships')->group(function () {
+    Route::get('/',        [InternshipController::class, 'index']);   // list with filters
+    Route::get('/options', [InternshipController::class, 'options']); // filter options
+    Route::get('/{id}',    [InternshipController::class, 'show']);    // single
 });
 
 
