@@ -62,6 +62,8 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
+
+
 Route::get('/balkan-trips', [BalkanTripController::class, 'index']);
 Route::get('/balkan-trips/{slug}', [BalkanTripController::class, 'show']);
 
@@ -155,8 +157,10 @@ Route::prefix('auth')->group(function () {
 
 
     // Notification
+    Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/notifications', [NotificationController::class, 'store']);
+});
 
 
         // Subscription Routes
