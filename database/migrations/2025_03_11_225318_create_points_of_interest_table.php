@@ -13,9 +13,10 @@ return new class extends Migration
             $table->foreignId('destination_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->enum('type', [
-                'event', 'hotel', 'restaurant', 'park', 
-                'museum', 'attraction', 'activity', 
-                'flight', 'shuttle'
+                'event', 'hotel', 'restaurant', 'bar',
+                'museum', 'attraction', 'activity',
+                'flight', 'shuttle', 'accommodation',
+                'legal advice', 'NIE/TIE'
             ]);
             $table->json('position')->comment('Geo coordinates as [latitude, longitude]');
             $table->text('description')->nullable();
@@ -32,7 +33,7 @@ return new class extends Migration
             $table->double('latitude')->virtualAs('JSON_UNQUOTE(JSON_EXTRACT(position, "$[0]"))');
             $table->double('longitude')->virtualAs('JSON_UNQUOTE(JSON_EXTRACT(position, "$[1]"))');
 
-            // Now add indexes
+            // Indexes
             $table->index('latitude');
             $table->index('longitude');
         });

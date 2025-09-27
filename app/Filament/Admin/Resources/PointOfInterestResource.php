@@ -18,7 +18,6 @@ use Filament\Forms\Components\Hidden;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Support\Js;
 
 class PointOfInterestResource extends Resource
 {
@@ -44,16 +43,24 @@ class PointOfInterestResource extends Resource
 
                 Select::make('type')
                     ->required()
+                    ->label('Type')
                     ->options([
-                        'event' => 'Event',
-                        'hotel' => 'Hotel',
-                        'restaurant' => 'Restaurant',
-                        'park' => 'Park',
-                        'museum' => 'Museum',
-                        'attraction' => 'Attraction',
-                        'activity' => 'Activity',
-                        'flight' => 'Flight',
-                        'shuttle' => 'Shuttle',
+                        // ✅ Kept types
+                        'accommodation' => 'Accommodation',
+                        'restaurant'    => 'Restaurant',
+                        'bar'           => 'Bar',
+                        'attraction'    => 'Attraction',
+                        'activity'      => 'Activity',
+                        'event'         => 'Event',
+                        'shuttle'       => 'Airport Shuttle',
+                        'legal advice'  => 'Legal Advice',
+                        'NIE/TIE'       => 'NIE/TIE',
+
+                        // ❌ Old types (commented out)
+                        // 'hotel'      => 'Hotel',
+                        // 'park'       => 'Park',
+                        // 'museum'     => 'Museum',
+                        // 'flight'     => 'Flight',
                     ]),
 
                 TextInput::make('latitude_input')
@@ -100,10 +107,11 @@ class PointOfInterestResource extends Resource
                     ->label('Amenities')
                     ->nullable(),
 
-                TextInput::make('flight_details')
-                    ->label('Flight Details (JSON)')
-                    ->nullable()
-                    ->rule('json'),
+                // ❌ Removed for now because "flight" type is not used
+                // TextInput::make('flight_details')
+                //     ->label('Flight Details (JSON)')
+                //     ->nullable()
+                //     ->rule('json'),
 
                 TextInput::make('shuttle_details')
                     ->label('Shuttle Details (JSON)')
@@ -136,7 +144,7 @@ class PointOfInterestResource extends Resource
                 ->sortable()
                 ->searchable(),
 
-            TextColumn::make('type')->sortable(),
+            TextColumn::make('type')->label('Type')->sortable(),
 
             TextColumn::make('destination.city')
                 ->label('Destination')
@@ -152,15 +160,22 @@ class PointOfInterestResource extends Resource
         ])
         ->filters([
             SelectFilter::make('type')->options([
-                'event' => 'Event',
-                'hotel' => 'Hotel',
-                'restaurant' => 'Restaurant',
-                'park' => 'Park',
-                'museum' => 'Museum',
-                'attraction' => 'Attraction',
-                'activity' => 'Activity',
-                'flight' => 'Flight',
-                'shuttle' => 'Shuttle',
+                // ✅ Kept types
+                'accommodation' => 'Accommodation',
+                'restaurant'    => 'Restaurants',
+                'bar'           => 'Bars',
+                'attraction'    => 'Attractions',
+                'activity'      => 'Activities',
+                'event'         => 'Events',
+                'shuttle'       => 'Airport Shuttle',
+                'legal advice'  => 'Legal Advice',
+                'NIE/TIE'       => 'NIE/TIE',
+
+                // ❌ Old types (commented out)
+                // 'hotel'   => 'Hotel',
+                // 'park'    => 'Park',
+                // 'museum'  => 'Museum',
+                // 'flight'  => 'Flight',
             ]),
         ]);
     }
@@ -173,9 +188,9 @@ class PointOfInterestResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPointOfInterests::route('/'),
+            'index'  => Pages\ListPointOfInterests::route('/'),
             'create' => Pages\CreatePointOfInterest::route('/create'),
-            'edit' => Pages\EditPointOfInterest::route('/{record}/edit'),
+            'edit'   => Pages\EditPointOfInterest::route('/{record}/edit'),
         ];
     }
 }
