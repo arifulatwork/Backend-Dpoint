@@ -6,26 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('travel_persona_options', function (Blueprint $table) {
             $table->id();
-             $table->foreignId('question_id')->constrained('travel_persona_questions')->onDelete('cascade');
-    $table->string('value');
-    $table->string('label');
-    $table->string('description')->nullable();
-    $table->string('emoji')->nullable();
-    $table->string('icon')->nullable(); 
+            $table->foreignId('question_id')
+                  ->constrained('travel_persona_questions')
+                  ->onDelete('cascade');
+
+            $table->string('value');                // e.g., peace, exploration
+            $table->string('label');                // display label
+            $table->text('description')->nullable();
+            $table->string('emoji', 16)->nullable();
+            $table->string('icon', 64)->nullable(); // lucide icon name, etc.
             $table->timestamps();
+
+            $table->unique(['question_id', 'value']); // no duplicate options per question
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('travel_persona_options');

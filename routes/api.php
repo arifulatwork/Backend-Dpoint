@@ -22,6 +22,8 @@ use App\Http\Controllers\PetraTourBookingController;
 use App\Http\Controllers\MontenegroTourBookingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\InternshipController;
+use App\Http\Controllers\TravelPersonaQuestionController;
+
 
 
 /*
@@ -44,6 +46,19 @@ Route::prefix('internships')->group(function () {
     Route::get('/',        [InternshipController::class, 'index']);   // list with filters
     Route::get('/options', [InternshipController::class, 'options']); // filter options
     Route::get('/{id}',    [InternshipController::class, 'show']);    // single
+});
+
+// Public: Questions + Options
+Route::prefix('travel-persona')->group(function () {
+    Route::get('/questions', [TravelPersonaQuestionController::class, 'index']);
+    Route::get('/questions/{key}', [TravelPersonaQuestionController::class, 'show']);
+});
+
+// Authenticated: Persist user’s persona answers
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user-preferences',  [UserPreferenceController::class, 'show']);
+    Route::post('/user-preferences', [UserPreferenceController::class, 'store']);
+    Route::put('/user-preferences',  [UserPreferenceController::class, 'update']);
 });
 
 

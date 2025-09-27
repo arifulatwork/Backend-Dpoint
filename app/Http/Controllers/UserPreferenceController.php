@@ -2,59 +2,53 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\UserPreference;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;
 
 class UserPreferenceController extends Controller
 {
-    // Show the current preferences
-    public function show()
-    {
-        $preference = Auth::user()->preferences;
+    // assumes you store persona as JSON column on users table or a separate table
+    // Example below uses users.travel_persona (json)
 
-        return response()->json($preference ?? ['message' => 'No preferences set yet.']);
+    public function show(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        return response()->json([
+            'travel_persona' => $user->travel_persona ?? (object)[],
+        ]);
     }
 
-    // Store new preferences
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        $request->validate([
-            'travel_persona' => 'required|array',
+        $data = $request->validate([
+            'travel_persona' => ['array'], // { key: value }
         ]);
 
-        $existing = Auth::user()->preferences;
+        $user = $request->user();
+        $user->travel_persona = $data['travel_persona'] ?? [];
+        $user->save();
 
-        if ($existing) {
-            return response()->json(['message' => 'Preferences already exist. Use update instead.'], 400);
-        }
-
-        $preference = new UserPreference([
-            'travel_persona' => $request->travel_persona,
-        ]);
-
-        Auth::user()->preferences()->save($preference);
-
-        return response()->json(['message' => 'Preferences saved successfully', 'preferences' => $preference]);
+        return response()->json([
+            'message' => 'Saved',
+            'travel_persona' => $user->travel_persona,
+        ], 201);
     }
 
-    // Update existing preferences
-    public function update(Request $request)
+    public function update(Request $request): JsonResponse
     {
-        $request->validate([
-            'travel_persona' => 'required|array',
+        $data = $request->validate([
+            'travel_persona' => ['array'],
         ]);
 
-        $preference = Auth::user()->preferences;
+        $user = $request->user();
+        // merge or replace — choose one. Here we replace for simplicity:
+        $user->travel_persona = $data['travel_persona'] ?? [];
+        $user->save();
 
-        if (!$preference) {
-            return response()->json(['message' => 'Preferences not found.'], 404);
-        }
-
-        $preference->update([
-            'travel_persona' => $request->travel_persona,
+        return response()->json([
+            'message' => 'Updated',
+            'travel_persona' => $user->travel_persona,
         ]);
-
-        return response()->json(['message' => 'Preferences updated successfully', 'preferences' => $preference]);
     }
 }

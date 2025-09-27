@@ -6,24 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('travel_persona_questions', function (Blueprint $table) {
             $table->id();
-             $table->string('question_id'); // e.g., travelReason, environment
-    $table->string('text');
-    $table->boolean('multiple')->default(false);
-    $table->boolean('has_budget_slider')->default(false);
+            $table->string('key')->unique();        // e.g., travelReason, environment
+            $table->string('text');                 // question text
+            $table->boolean('multiple')->default(false);
+            $table->boolean('has_budget_slider')->default(false);
             $table->timestamps();
+
+            $table->index('key'); // optional (unique already indexes it)
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('travel_persona_questions');
