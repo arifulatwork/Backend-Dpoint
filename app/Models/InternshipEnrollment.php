@@ -23,12 +23,17 @@ class InternshipEnrollment extends Model
         'failure_message',
     ];
 
+    // Or: protected $guarded = [];
+
     protected $casts = [
         'payment_details' => 'array',
         'enrolled_at' => 'datetime',
         'payment_completed_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
+    // ─────────────── RELATIONSHIPS ───────────────
     public function user()
     {
         return $this->belongsTo(User::class);
