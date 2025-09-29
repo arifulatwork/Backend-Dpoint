@@ -100,8 +100,6 @@ class InternshipEnrollmentController extends Controller
                             'product_data' => [
                                 'name' => $internship->title,
                                 'description' => 'Internship enrollment — '.$internship->company,
-                                // Only put absolute, publicly resolvable URLs if you add 'images'
-                                // 'images' => [ 'https://example.com/image.jpg' ],
                             ],
                         ],
                     ]],
@@ -115,15 +113,18 @@ class InternshipEnrollmentController extends Controller
                     'cancel_url'  => $cancel,
                 ]);
 
-                // Optional: placeholder payment log
-                InternshipPayment::create([
-                    'enrollment_id' => $enrollment->id,
-                    'stripe_payment_intent_id' => (string)($session->payment_intent ?? ''),
-                    'amount' => $amountEur,
-                    'currency' => $currency,
-                    'status' => 'pending',
-                    'stripe_response' => $session->toArray(),
-                ]);
+                // ✅ Placeholder payment log keyed by Checkout Session (PI can be null now)
+                InternshipPayment::updateOrCreate(
+                    ['stripe_checkout_session_id' => $session->id],
+                    [
+                        'enrollment_id' => $enrollment->id,
+                        'stripe_payment_intent_id' => $session->payment_intent ?? null, // keep null if absent
+                        'amount' => $amountEur,
+                        'currency' => $currency,
+                        'status' => 'pending',
+                        'stripe_response' => $session->toArray(),
+                    ]
+                );
 
                 return response()->json(['checkout_url' => $session->url]);
             }
@@ -146,14 +147,17 @@ class InternshipEnrollmentController extends Controller
                 'status' => 'processing',
             ]);
 
-            InternshipPayment::create([
-                'enrollment_id' => $enrollment->id,
-                'stripe_payment_intent_id' => $intent->id,
-                'amount' => $amountEur,
-                'currency' => $currency,
-                'status' => 'pending',
-                'stripe_response' => $intent->toArray(),
-            ]);
+            InternshipPayment::updateOrCreate(
+                ['stripe_payment_intent_id' => $intent->id],
+                [
+                    'enrollment_id' => $enrollment->id,
+                    'stripe_checkout_session_id' => null,
+                    'amount' => $amountEur,
+                    'currency' => $currency,
+                    'status' => 'pending',
+                    'stripe_response' => $intent->toArray(),
+                ]
+            );
 
             return response()->json([
                 'client_secret' => $intent->client_secret,
@@ -196,10 +200,17 @@ class InternshipEnrollmentController extends Controller
                         ],
                     ]);
 
-                    $enrollment->payments()->latest()->first()?->update([
-                        'status' => 'succeeded',
-                        'stripe_response' => $intent->toArray(),
-                    ]);
+                    InternshipPayment::updateOrCreate(
+                        ['stripe_payment_intent_id' => $intent->id],
+                        [
+                            'enrollment_id' => $enrollment->id,
+                            'stripe_checkout_session_id' => null,
+                            'amount' => $enrollment->amount,
+                            'currency' => $enrollment->currency,
+                            'status' => 'succeeded',
+                            'stripe_response' => $intent->toArray(),
+                        ]
+                    );
                 });
 
                 return response()->json(['status' => 'ok']);
@@ -215,10 +226,17 @@ class InternshipEnrollmentController extends Controller
                 'failure_message' => $intent->last_payment_error?->message,
             ]);
 
-            $enrollment->payments()->latest()->first()?->update([
-                'status' => 'failed',
-                'stripe_response' => $intent->toArray(),
-            ]);
+            InternshipPayment::updateOrCreate(
+                ['stripe_payment_intent_id' => $intent->id],
+                [
+                    'enrollment_id' => $enrollment->id,
+                    'stripe_checkout_session_id' => null,
+                    'amount' => $enrollment->amount,
+                    'currency' => $enrollment->currency,
+                    'status' => 'failed',
+                    'stripe_response' => $intent->toArray(),
+                ]
+            );
 
             return response()->json([
                 'status' => 'failed',
@@ -244,17 +262,18 @@ class InternshipEnrollmentController extends Controller
         try {
             $event = \Stripe\Webhook::constructEvent($payload, $sig, $secret);
         } catch (\Throwable $e) {
+            Log::warning('Stripe webhook signature invalid: '.$e->getMessage());
             return response()->json(['error' => 'Invalid signature'], 400);
         }
 
         switch ($event->type) {
-            case 'checkout.session.completed':
+            case 'checkout.session.completed': {
+                /** @var \Stripe\Checkout\Session $session */
                 $session = $event->data->object;
 
-                if (!empty($session->metadata->enrollment_id)) {
-                    $enrollmentId = (int) $session->metadata->enrollment_id;
+                $enrollmentId = (int) ($session->metadata->enrollment_id ?? 0);
+                if ($enrollmentId) {
                     $enrollment = InternshipEnrollment::find($enrollmentId);
-
                     if ($enrollment) {
                         $enrollment->update([
                             'status' => 'succeeded',
@@ -266,20 +285,28 @@ class InternshipEnrollmentController extends Controller
                             ],
                         ]);
 
-                        $enrollment->payments()->create([
-                            'stripe_payment_intent_id' => $session->payment_intent ?? '',
-                            'amount' => $enrollment->amount,
-                            'currency' => $enrollment->currency,
-                            'status' => 'succeeded',
-                            'stripe_response' => $session->toArray(),
-                        ]);
+                        // ✅ upsert payment row by checkout_session_id
+                        InternshipPayment::updateOrCreate(
+                            ['stripe_checkout_session_id' => $session->id],
+                            [
+                                'enrollment_id' => $enrollment->id,
+                                'stripe_payment_intent_id' => $session->payment_intent ?? null,
+                                'amount' => $enrollment->amount,
+                                'currency' => $enrollment->currency,
+                                'status' => 'succeeded',
+                                'stripe_response' => $session->toArray(),
+                            ]
+                        );
                     }
                 }
                 break;
+            }
 
-            case 'payment_intent.succeeded':
+            case 'payment_intent.succeeded': {
+                /** @var \Stripe\PaymentIntent $intent */
                 $intent = $event->data->object;
                 $enrollment = InternshipEnrollment::where('stripe_payment_intent_id', $intent->id)->first();
+
                 if ($enrollment) {
                     $enrollment->update([
                         'status' => 'succeeded',
@@ -291,36 +318,80 @@ class InternshipEnrollmentController extends Controller
                         ],
                     ]);
 
-                    $enrollment->payments()->create([
-                        'stripe_payment_intent_id' => $intent->id,
-                        'amount' => $enrollment->amount,
-                        'currency' => $enrollment->currency,
-                        'status' => 'succeeded',
-                        'stripe_response' => $intent->toArray(),
-                    ]);
+                    // ✅ upsert by PI id
+                    InternshipPayment::updateOrCreate(
+                        ['stripe_payment_intent_id' => $intent->id],
+                        [
+                            'enrollment_id' => $enrollment->id,
+                            'stripe_checkout_session_id' => null,
+                            'amount' => $enrollment->amount,
+                            'currency' => $enrollment->currency,
+                            'status' => 'succeeded',
+                            'stripe_response' => $intent->toArray(),
+                        ]
+                    );
                 }
                 break;
+            }
 
-            case 'payment_intent.payment_failed':
+            case 'payment_intent.payment_failed': {
+                /** @var \Stripe\PaymentIntent $intent */
                 $intent = $event->data->object;
                 $enrollment = InternshipEnrollment::where('stripe_payment_intent_id', $intent->id)->first();
+
                 if ($enrollment) {
                     $enrollment->update([
                         'status' => 'failed',
                         'failure_message' => $intent->last_payment_error?->message,
                     ]);
 
-                    $enrollment->payments()->create([
-                        'stripe_payment_intent_id' => $intent->id,
-                        'amount' => $enrollment->amount,
-                        'currency' => $enrollment->currency,
-                        'status' => 'failed',
-                        'stripe_response' => $intent->toArray(),
-                    ]);
+                    InternshipPayment::updateOrCreate(
+                        ['stripe_payment_intent_id' => $intent->id],
+                        [
+                            'enrollment_id' => $enrollment->id,
+                            'stripe_checkout_session_id' => null,
+                            'amount' => $enrollment->amount,
+                            'currency' => $enrollment->currency,
+                            'status' => 'failed',
+                            'stripe_response' => $intent->toArray(),
+                        ]
+                    );
                 }
                 break;
+            }
         }
 
         return response()->json(['received' => true]);
+    }
+
+    public function enrolledIds(Request $request)
+    {
+        $user = $request->user();
+
+        $ids = InternshipEnrollment::where('user_id', $user->id)
+            ->where('status', 'succeeded')
+            ->pluck('internship_id')
+            ->values();
+
+        return response()->json(['enrolled_ids' => $ids]);
+    }
+
+    public function enrollmentDetails(Request $request, int $id)
+    {
+        $user = $request->user();
+
+        $enrollment = InternshipEnrollment::with('internship')
+            ->where('user_id', $user->id)
+            ->where('internship_id', $id)
+            ->first();
+
+        if (!$enrollment) {
+            return response()->json(['message' => 'Not enrolled'], 404);
+        }
+
+        return response()->json([
+            'status' => $enrollment->status,
+            'enrollment' => $enrollment,
+        ]);
     }
 }

@@ -109,6 +109,12 @@ Route::prefix('auth')->group(function () {
         Route::prefix('internships')->group(function () {
             Route::post('/enroll/create-payment-intent', [InternshipEnrollmentController::class, 'createPaymentIntent']);
             Route::post('/enroll/confirm', [InternshipEnrollmentController::class, 'confirm']); // only if using PI flow
+            // ✅ NEW: Get all internship IDs the user has successfully enrolled in
+            Route::get('/enrolled-ids', [InternshipEnrollmentController::class, 'enrolledIds']);
+
+            // (optional) details for one internship’s enrollment
+            Route::get('/{id}/enrollment', [InternshipEnrollmentController::class, 'enrollmentDetails']);
+
         });
 
         Route::controller(LocalTouchBookingController::class)->prefix('localtouch')->group(function () {
