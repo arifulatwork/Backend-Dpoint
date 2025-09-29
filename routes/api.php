@@ -23,6 +23,7 @@ use App\Http\Controllers\MontenegroTourBookingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\InternshipController;
 use App\Http\Controllers\TravelPersonaQuestionController;
+use App\Http\Controllers\InternshipEnrollmentController;
 
 
 
@@ -102,6 +103,12 @@ Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', function (Request $request) {
             return $request->user();
+        });
+
+         // ---- Internships: enrollment + payment ----
+        Route::prefix('internships')->group(function () {
+            Route::post('/enroll/create-payment-intent', [InternshipEnrollmentController::class, 'createPaymentIntent']);
+            Route::post('/enroll/confirm', [InternshipEnrollmentController::class, 'confirm']); // only if using PI flow
         });
 
         Route::controller(LocalTouchBookingController::class)->prefix('localtouch')->group(function () {
