@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Auth\Notifications\ResetPassword;
 
 class User extends Authenticatable
 {
@@ -35,12 +36,59 @@ class User extends Authenticatable
     ];
 
     /**
-     * Cast attributes.
+     * Attribute casting.
+     * - 'password' => 'hashed' auto-hashes on set (Laravel 10+)
+     * - 'interests' => 'array' keeps JSON as PHP array
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'interests' => 'array',
+        'interests'         => 'array',
+        'password'          => 'hashed',
     ];
+
+    /**
+     * Default attribute values.
+     */
+    protected $attributes = [
+        'interests' => '[]',
+    ];
+
+    // ───────────────────────────────────────────────
+    // PASSWORD RESET (SPA-FRIENDLY URL)
+    // ───────────────────────────────────────────────
+
+    /**
+     * Override the default password reset notification to point to your SPA route.
+     * It builds a URL like:
+     *   {FRONTEND_URL}/reset-password?token=...&email=...
+     *
+     * Set FRONTEND_URL in .env (fallbacks to APP_URL).
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $frontend = config('app.frontend_url', env('FRONTEND_URL', config('app.url', 'http://localhost')));
+
+        $resetUrl = rtrim($frontend, '/')
+            . '/reset-password?token=' . $token
+            . '&email=' . urlencode($this->email);
+
+        // Use an anonymous class extending the default to force our SPA URL in the button
+        $this->notify(new class($token, $resetUrl) extends ResetPassword {
+            protected string $spaUrl;
+
+            public function __construct(string $token, string $spaUrl)
+            {
+                parent::__construct($token);
+                $this->spaUrl = $spaUrl;
+            }
+
+            public function toMail($notifiable)
+            {
+                $mail = parent::toMail($notifiable);
+                return $mail->action(__('Reset Password'), $this->spaUrl);
+            }
+        });
+    }
 
     // ───────────────────────────────────────────────
     // RELATIONSHIPS
