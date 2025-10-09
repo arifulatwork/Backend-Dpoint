@@ -98,9 +98,12 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     // 🔐 Add this below login/register, still outside Sanctum
     Route::post('/forgot-password', [AuthController::class, 'sendResetLink']);
+    Route::post('/auth/reset-password',  [AuthController::class, 'resetPassword']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
+          // ✅ Add your /me endpoint here
+        Route::get('/me', [AuthController::class, 'me']);
         Route::get('/user', function (Request $request) {
             return $request->user();
         });
