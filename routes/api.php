@@ -108,6 +108,15 @@ Route::prefix('auth')->group(function () {
             return $request->user();
         });
 
+       
+    Route::controller(App\Http\Controllers\StudentIntakeController::class)
+        ->prefix('student-intake')
+        ->group(function () {
+            Route::post('/initiate', 'initiate'); // create PaymentIntent + save form (pending)
+            Route::get('/status/{submission}', 'status'); // check payment + submission status
+        });
+
+
          // ---- Internships: enrollment + payment ----
         Route::prefix('internships')->group(function () {
             Route::post('/enroll/create-payment-intent', [InternshipEnrollmentController::class, 'createPaymentIntent']);
