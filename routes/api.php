@@ -24,6 +24,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\InternshipController;
 use App\Http\Controllers\TravelPersonaQuestionController;
 use App\Http\Controllers\InternshipEnrollmentController;
+use App\Http\Controllers\AccommodationAppointmentController;
 
 
 
@@ -42,6 +43,9 @@ Route::controller(DestinationController::class)->group(function () {
     Route::get('/destinations', 'index');
     Route::get('/destinations/{id}', 'show');
 });
+
+// Public: create accommodation appointment
+Route::post('/appointments', [AccommodationAppointmentController::class, 'store']);
 
 Route::prefix('internships')->group(function () {
     Route::get('/',        [InternshipController::class, 'index']);   // list with filters

@@ -80,4 +80,10 @@ class PointOfInterest extends Model
     {
         return $this->belongsTo(Destination::class);
     }
+
+    public function accommodationAppointments()
+{
+    return $this->hasMany(\App\Models\AccommodationAppointment::class);
+}
+
 }
