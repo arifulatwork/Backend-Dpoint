@@ -47,4 +47,9 @@ class Attraction extends Model
     {
         return $this->hasOne(Guide::class);
     }
+
+    public function openingHours()
+        {
+            return $this->hasMany(AttractionOpeningHour::class)->orderBy('day_of_week');
+        }
 }

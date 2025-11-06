@@ -25,6 +25,8 @@ use App\Http\Controllers\InternshipController;
 use App\Http\Controllers\TravelPersonaQuestionController;
 use App\Http\Controllers\InternshipEnrollmentController;
 use App\Http\Controllers\AccommodationAppointmentController;
+use App\Http\Controllers\AttractionOpeningHourController;
+
 
 
 
@@ -46,6 +48,10 @@ Route::controller(DestinationController::class)->group(function () {
 
 // Public: create accommodation appointment
 Route::post('/appointments', [AccommodationAppointmentController::class, 'store']);
+
+// Public: read opening hours for an attraction
+Route::get('/attractions/{attraction}/opening-hours', [AttractionOpeningHourController::class, 'index']);
+
 
 Route::prefix('internships')->group(function () {
     Route::get('/',        [InternshipController::class, 'index']);   // list with filters
