@@ -32,6 +32,7 @@ use App\Http\Controllers\AttractionOpeningHourController;
 use App\Http\Controllers\TourController;
 use App\Http\Controllers\TourBookingController;
 use App\Http\Controllers\TourStripeWebhookController;
+use App\Http\Controllers\TourCategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +51,11 @@ Route::controller(DestinationController::class)->group(function () {
     Route::get('/destinations', 'index');
     Route::get('/destinations/{id}', 'show');
 });
+
+// Tours Categories
+
+Route::get('/tour-categories', [TourCategoryController::class, 'index']);
+Route::get('/tour-categories/{key}', [TourCategoryController::class, 'show']);
 
 // Public: create accommodation appointment
 Route::post('/appointments', [AccommodationAppointmentController::class, 'store']);
