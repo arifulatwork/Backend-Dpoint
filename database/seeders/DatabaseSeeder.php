@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             BalkanTripSeeder::class,
             InternshipMarketplaceSeeder::class,
             TravelPersonaSeeder::class,
+            TourSeeder::class,
         ]);
     }
 }
