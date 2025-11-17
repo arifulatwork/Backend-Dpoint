@@ -27,6 +27,7 @@ use App\Http\Controllers\TravelPersonaQuestionController;
 use App\Http\Controllers\InternshipEnrollmentController;
 use App\Http\Controllers\AccommodationAppointmentController;
 use App\Http\Controllers\AttractionOpeningHourController;
+use App\Http\Controllers\InternshipMarketplaceController;
 
 // NEW (generic Tours system)
 use App\Http\Controllers\TourController;
@@ -51,6 +52,13 @@ Route::controller(DestinationController::class)->group(function () {
     Route::get('/destinations', 'index');
     Route::get('/destinations/{id}', 'show');
 });
+
+// Public: Internship
+Route::get('/internships/locations', [InternshipMarketplaceController::class, 'locations']);
+Route::get('/internships/fields', [InternshipMarketplaceController::class, 'fields']);
+Route::get('/internships/services', [InternshipMarketplaceController::class, 'services']);
+Route::get('/internships/conditions', [InternshipMarketplaceController::class, 'conditions']);
+Route::get('/internships/companies', [InternshipMarketplaceController::class, 'companies']);
 
 // Tours Categories
 
@@ -272,6 +280,11 @@ Route::prefix('auth')->group(function () {
             Route::post('/user-preferences', 'store');
             Route::put('/user-preferences', 'update');
         });
+
+        // Internship Application
+
+        Route::post('/internships/apply', [InternshipMarketplaceController::class, 'apply']);
+        Route::get('/internships/my-applications', [InternshipMarketplaceController::class, 'myApplications']);
 
         // Network & Messaging (existing)
         Route::controller(NetworkController::class)->group(function () {

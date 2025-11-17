@@ -2,228 +2,226 @@
 
 namespace Database\Seeders;
 
-use App\Models\Internship;
-use App\Models\InternshipCategory;
-use App\Models\InternshipLearningOutcome;
-use App\Models\InternshipSkill;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
+use App\Models\{
+    InternshipLocation,
+    InternshipField,
+    InternshipCompany,
+    InternshipService,
+    InternshipCondition,
+    InternshipApplication
+};
 
 class InternshipMarketplaceSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1) Categories (use slug as stable key)
-        $categories = [
-            ['slug' => 'it',         'name' => 'Information Technology', 'icon' => 'briefcase'],
-            ['slug' => 'management', 'name' => 'Business Management',    'icon' => 'users'],
-            ['slug' => 'marketing',  'name' => 'Digital Marketing',       'icon' => 'building'],
-            ['slug' => 'design',     'name' => 'UI/UX Design',            'icon' => 'award'],
-            ['slug' => 'data',       'name' => 'Data Science',            'icon' => 'book-open'],
+        // First clear applications that reference companies
+        InternshipApplication::query()->delete();
+
+        // Locations
+        InternshipLocation::query()->delete();
+
+        $locations = [
+            [
+                'slug' => 'spain',
+                'country' => 'Spain',
+                'cities' => ['Barcelona', 'Madrid', 'Valencia'],
+                'flag' => '🇪🇸',
+                'popular' => true,
+            ],
+            [
+                'slug' => 'uk',
+                'country' => 'England',
+                'cities' => ['London', 'Manchester', 'Edinburgh'],
+                'flag' => '🇬🇧',
+                'popular' => true,
+            ],
+            [
+                'slug' => 'usa',
+                'country' => 'United States',
+                'cities' => ['New York', 'Miami', 'Los Angeles'],
+                'flag' => '🇺🇸',
+                'popular' => true,
+            ],
+            [
+                'slug' => 'argentina',
+                'country' => 'Argentina',
+                'cities' => ['Buenos Aires', 'Córdoba', 'Mendoza'],
+                'flag' => '🇦🇷',
+                'popular' => false,
+            ],
+            [
+                'slug' => 'france',
+                'country' => 'France',
+                'cities' => ['Paris', 'Lyon', 'Marseille'],
+                'flag' => '🇫🇷',
+                'popular' => false,
+            ],
+            [
+                'slug' => 'germany',
+                'country' => 'Germany',
+                'cities' => ['Berlin', 'Munich', 'Hamburg'],
+                'flag' => '🇩🇪',
+                'popular' => false,
+            ],
         ];
 
-        foreach ($categories as $c) {
-            InternshipCategory::updateOrCreate(
-                ['slug' => $c['slug']],
-                ['name' => $c['name'], 'icon' => $c['icon']]
-            );
+        foreach ($locations as $loc) {
+            InternshipLocation::create($loc);
         }
 
-        // Helper by NAME (so you can keep your internship array as-is)
-        $catId = fn (string $categoryName) =>
-            InternshipCategory::where('name', $categoryName)->value('id');
+        // Fields
+        InternshipField::query()->delete();
 
-        // 2) Skills
-        $skills = [
-            'React','TypeScript','CSS','JavaScript',
-            'Project Management','Agile','Scrum','JIRA',
-            'Python','Machine Learning','SQL','Data Visualization',
-            'SEO','Social Media','Content Marketing','Analytics',
-            'Figma','User Research','Wireframing','Prototyping',
-            'Excel','Tableau','Statistical Analysis',
-        ];
-
-        $skillIdByName = collect($skills)->mapWithKeys(function ($name) {
-            $model = InternshipSkill::firstOrCreate(['name' => $name]);
-            return [$name => $model->id];
-        });
-
-        // 3) Internships (matches your React mock data)
-        $internships = [
+        InternshipField::insert([
             [
-                'title' => 'Frontend Development Intern',
-                'category' => 'Information Technology',
-                'description' => 'Join our dynamic team to build cutting-edge web applications using React and TypeScript.',
-                'duration' => '3 months',
-                'price' => 299, 'original_price' => 399,
-                'rating' => 4.8, 'review_count' => 142,
-                'company' => 'TechInnovate Inc.',
-                'location' => 'North America',
-                'mode' => 'remote',
-                'image' => 'https://picsum.photos/seed/frontend/600/400',
-                'featured' => true,
-                'deadline' => now()->addMonths(2)->toDateString(),
-                'spots_left' => 5,
-                'skills' => ['React', 'TypeScript', 'CSS', 'JavaScript'],
-                'learning_outcomes' => [
-                    'Master React and modern frontend frameworks',
-                    'Learn to work in agile development teams',
-                    'Build portfolio-worthy projects',
-                ],
+                'slug' => 'technology',
+                'name' => 'Technology & IT',
+                'description' => 'Software development, IT support, cybersecurity',
             ],
             [
-                'title' => 'IT Project Management Intern',
-                'category' => 'Business Management',
-                'description' => 'Gain hands-on experience managing IT projects from conception to delivery.',
-                'duration' => '4 months',
-                'price' => 349,
-                'rating' => 4.6, 'review_count' => 89,
-                'company' => 'GlobalTech Solutions',
-                'location' => 'Europe',
-                'mode' => 'hybrid',
-                'image' => 'https://picsum.photos/seed/pm/600/400',
-                'featured' => true,
-                'deadline' => null,
-                'spots_left' => 8,
-                'skills' => ['Project Management', 'Agile', 'Scrum', 'JIRA'],
-                'learning_outcomes' => [
-                    'Learn project management methodologies',
-                    'Develop leadership and team coordination skills',
-                    'Understand budgeting and resource allocation',
-                ],
+                'slug' => 'business',
+                'name' => 'Business & Marketing',
+                'description' => 'Marketing, sales, business development',
             ],
             [
-                'title' => 'Data Science Internship',
-                'category' => 'Data Science',
-                'description' => 'Work with large datasets and build machine learning models in a real-world environment.',
-                'duration' => '6 months',
-                'price' => 449, 'original_price' => 549,
-                'rating' => 4.9, 'review_count' => 217,
-                'company' => 'DataInsights Corp',
-                'location' => 'Asia',
-                'mode' => 'on-site',
-                'image' => 'https://picsum.photos/seed/datasci/600/400',
-                'featured' => false,
-                'deadline' => now()->addMonths(3)->toDateString(),
-                'spots_left' => null,
-                'skills' => ['Python', 'Machine Learning', 'SQL', 'Data Visualization'],
-                'learning_outcomes' => [
-                    'Master data cleaning and preprocessing techniques',
-                    'Build and evaluate machine learning models',
-                    'Create compelling data visualizations',
-                ],
+                'slug' => 'hospitality',
+                'name' => 'Hospitality & Tourism',
+                'description' => 'Hotels, tourism, event management',
             ],
             [
-                'title' => 'Digital Marketing Intern',
-                'category' => 'Digital Marketing',
-                'description' => 'Develop and execute digital marketing campaigns across various platforms.',
-                'duration' => '3 months',
-                'price' => 249,
-                'rating' => 4.5, 'review_count' => 93,
-                'company' => 'NextGen Media',
+                'slug' => 'education',
+                'name' => 'Education',
+                'description' => 'Teaching, educational administration',
+            ],
+            [
+                'slug' => 'healthcare',
+                'name' => 'Healthcare',
+                'description' => 'Medical, nursing, healthcare administration',
+            ],
+            [
+                'slug' => 'engineering',
+                'name' => 'Engineering',
+                'description' => 'Civil, mechanical, electrical engineering',
+            ],
+        ]);
+
+        // Companies
+        InternshipCompany::query()->delete();
+
+        InternshipCompany::insert([
+            [
+                'name' => 'DPrealeste - Real Estate Research',
+                'logo_url' => '/api/placeholder/80/80',
+                'location' => 'Barcelona, Spain',
+                'field_slug' => 'business',
+                'rating' => 4.8,
+                'reviews' => 124,
+                'work_mode' => 'hybrid',
+                'duration' => '4-6 months',
+                'hours' => '20-30h/week',
+            ],
+            [
+                'name' => 'DPrealeste - Digital Marketing',
+                'logo_url' => '/api/placeholder/80/80',
+                'location' => 'Barcelona, Spain',
+                'field_slug' => 'business',
+                'rating' => 4.6,
+                'reviews' => 89,
+                'work_mode' => 'hybrid',
+                'duration' => '4-6 months',
+                'hours' => '20-30h/week',
+            ],
+            [
+                'name' => 'Meet & Eat - Event Coordination',
+                'logo_url' => '/api/placeholder/80/80',
+                'location' => 'Barcelona, Spain',
+                'field_slug' => 'hospitality',
+                'rating' => 4.7,
+                'reviews' => 67,
+                'work_mode' => 'offline',
+                'duration' => '3-6 months',
+                'hours' => '15-25h/week',
+            ],
+            [
+                'name' => 'Electronic Software Solutions',
+                'logo_url' => '/api/placeholder/80/80',
                 'location' => 'Remote',
-                'mode' => 'remote',
-                'image' => 'https://picsum.photos/seed/marketing/600/400',
-                'featured' => false,
-                'deadline' => null,
-                'spots_left' => null,
-                'skills' => ['SEO', 'Social Media', 'Content Marketing', 'Analytics'],
-                'learning_outcomes' => [
-                    'Plan and execute multi-channel marketing campaigns',
-                    'Analyze campaign performance with analytics tools',
-                    'Optimize content for search engines',
-                ],
+                'field_slug' => 'technology',
+                'rating' => 4.9,
+                'reviews' => 156,
+                'work_mode' => 'online',
+                'duration' => '3-12 months',
+                'hours' => 'Flexible',
             ],
             [
-                'title' => 'UI/UX Design Intern',
-                'category' => 'UI/UX Design',
-                'description' => 'Create intuitive and beautiful user interfaces for our product suite.',
-                'duration' => '4 months',
-                'price' => 329, 'original_price' => 399,
-                'rating' => 4.7, 'review_count' => 124,
-                'company' => 'DesignCraft Studios',
-                'location' => 'North America',
-                'mode' => 'hybrid',
-                'image' => 'https://picsum.photos/seed/uiux/600/400',
-                'featured' => true,
-                'deadline' => null,
-                'spots_left' => 3,
-                'skills' => ['Figma', 'User Research', 'Wireframing', 'Prototyping'],
-                'learning_outcomes' => [
-                    'Conduct user research and usability testing',
-                    'Create wireframes and interactive prototypes',
-                    'Design responsive interfaces for multiple devices',
-                ],
+                'name' => 'Dpoint Group - Business Development',
+                'logo_url' => '/api/placeholder/80/80',
+                'location' => 'Multiple Locations',
+                'field_slug' => 'business',
+                'rating' => 4.5,
+                'reviews' => 78,
+                'work_mode' => 'hybrid',
+                'duration' => '4-8 months',
+                'hours' => '20-35h/week',
+            ],
+        ]);
+
+        // Services
+        InternshipService::query()->delete();
+
+        InternshipService::insert([
+            [
+                'slug' => 'cv-enhancement',
+                'name' => 'CV Enhancement',
+                'description' => 'Professional CV redesign and content optimization by our experts',
+                'price' => 100,
+                'original_price' => null,
+                'popular' => false,
             ],
             [
-                'title' => 'Business Analytics Intern',
-                'category' => 'Data Science',
-                'description' => 'Help businesses make data-driven decisions through analytical insights.',
-                'duration' => '5 months',
-                'price' => 399,
-                'rating' => 4.6, 'review_count' => 78,
-                'company' => 'StrategyPlus Consultants',
-                'location' => 'Europe',
-                'mode' => 'remote',
-                'image' => 'https://picsum.photos/seed/ba/600/400',
-                'featured' => false,
-                'deadline' => null,
-                'spots_left' => null,
-                'skills' => ['Excel', 'SQL', 'Tableau', 'Statistical Analysis'],
-                'learning_outcomes' => [
-                    'Transform raw data into actionable insights',
-                    'Create dashboards and reports for stakeholders',
-                    'Develop predictive models for business forecasting',
-                ],
+                'slug' => 'placement',
+                'name' => 'Internship Placement',
+                'description' => 'Guaranteed placement in a company that matches your profile',
+                'price' => 390,
+                'original_price' => 490,
+                'popular' => true,
             ],
-        ];
+            [
+                'slug' => 'premium-package',
+                'name' => 'Premium Package',
+                'description' => 'CV Enhancement + Placement (Best Value)',
+                'price' => 290,
+                'original_price' => 490,
+                'popular' => false,
+            ],
+        ]);
 
-        foreach ($internships as $i) {
-            // Create / update internship (use title+company as a natural key)
-            $internship = Internship::updateOrCreate(
-                ['title' => $i['title'], 'company' => $i['company']],
-                [
-                    'category_id'    => $catId($i['category']),
-                    'description'    => $i['description'],
-                    'duration'       => $i['duration'],
-                    'price'          => $i['price'],
-                    'original_price' => $i['original_price'] ?? null,
-                    'rating'         => $i['rating'],
-                    'review_count'   => $i['review_count'],
-                    'location'       => $i['location'],
-                    'mode'           => $i['mode'], // 'remote' | 'on-site' | 'hybrid'
-                    'image'          => $i['image'], // store URL into image_path column
-                    'featured'       => $i['featured'],
-                    'deadline'       => $i['deadline'],
-                    'spots_left'     => $i['spots_left'],
-                ]
-            );
+        // Conditions
+        InternshipCondition::query()->delete();
 
-            // Attach skills
-            $skillIds = collect($i['skills'])
-                ->map(fn ($name) => $skillIdByName[$name] ?? null)
-                ->filter()
-                ->values()
-                ->all();
-
-            if (method_exists($internship, 'skills')) {
-                $internship->skills()->sync($skillIds);
-            }
-
-            // Learning outcomes
-            if (!empty($i['learning_outcomes'])) {
-                // Clear old outcomes on reseed
-                if (class_exists(InternshipLearningOutcome::class)) {
-                    InternshipLearningOutcome::where('internship_id', $internship->id)->delete();
-                }
-
-                foreach ($i['learning_outcomes'] as $outcome) {
-                    InternshipLearningOutcome::create([
-                        'internship_id' => $internship->id,
-                        'outcome'       => $outcome,
-                    ]);
-                }
-            }
-        }
+        InternshipCondition::insert([
+            [
+                'slug' => 'age',
+                'text' => 'To be 18 years old or over',
+                'required' => true,
+            ],
+            [
+                'slug' => 'language',
+                'text' => 'To have a high level in the language of the country where you will carry out your internship or to have intermediate level English',
+                'required' => true,
+            ],
+            [
+                'slug' => 'visa',
+                'text' => 'To have a valid student visa or a valid passport for the corresponding country',
+                'required' => true,
+            ],
+            [
+                'slug' => 'university',
+                'text' => 'To be able to provide a university form/agreement to be signed with the company',
+                'required' => true,
+            ],
+        ]);
     }
 }

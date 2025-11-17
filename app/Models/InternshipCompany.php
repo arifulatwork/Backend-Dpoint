@@ -5,17 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class InternshipCategory extends Model
+class InternshipCompany extends Model
 {
     use HasFactory;
-
     protected $fillable = [
-        'name',
-        'icon',
+        'name', 'logo_url', 'location', 'field_slug',
+        'rating', 'reviews', 'work_mode', 'duration', 'hours',
     ];
-
-    public function internships()
-    {
-    return $this->hasMany(Internship::class, 'category_id');
-    }
 }
