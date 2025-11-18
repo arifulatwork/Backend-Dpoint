@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 use App\Models\{
     InternshipLocation,
@@ -24,11 +26,11 @@ class InternshipMarketplaceController extends Controller
     {
         return response()->json(
             InternshipLocation::all()->map(fn($loc) => [
-                'id' => $loc->slug,
-                'country' => $loc->country,
-                'cities' => $loc->cities,
-                'flag' => $loc->flag,
-                'popular' => $loc->popular,
+                'id'       => $loc->slug,
+                'country'  => $loc->country,
+                'cities'   => $loc->cities,
+                'flag'     => $loc->flag,
+                'popular'  => $loc->popular,
             ])
         );
     }
@@ -37,8 +39,8 @@ class InternshipMarketplaceController extends Controller
     {
         return response()->json(
             InternshipField::all()->map(fn($f) => [
-                'id' => $f->slug,
-                'name' => $f->name,
+                'id'          => $f->slug,
+                'name'        => $f->name,
                 'description' => $f->description,
             ])
         );
@@ -48,12 +50,12 @@ class InternshipMarketplaceController extends Controller
     {
         return response()->json(
             InternshipService::all()->map(fn($s) => [
-                'id' => $s->slug,
-                'name' => $s->name,
-                'description' => $s->description,
-                'price' => (float)$s->price,
-                'originalPrice' => $s->original_price ? (float)$s->original_price : null,
-                'popular' => $s->popular,
+                'id'            => $s->slug,
+                'name'          => $s->name,
+                'description'   => $s->description,
+                'price'         => (float) $s->price,
+                'originalPrice' => $s->original_price ? (float) $s->original_price : null,
+                'popular'       => $s->popular,
             ])
         );
     }
@@ -62,8 +64,8 @@ class InternshipMarketplaceController extends Controller
     {
         return response()->json(
             InternshipCondition::all()->map(fn($c) => [
-                'id' => $c->slug,
-                'text' => $c->text,
+                'id'       => $c->slug,
+                'text'     => $c->text,
                 'required' => $c->required,
             ])
         );
@@ -72,7 +74,7 @@ class InternshipMarketplaceController extends Controller
     public function companies(Request $request)
     {
         $location = $request->query('location');
-        $field = $request->query('field');
+        $field    = $request->query('field');
 
         $query = InternshipCompany::query();
 
@@ -86,16 +88,16 @@ class InternshipMarketplaceController extends Controller
 
         return response()->json(
             $query->get()->map(fn($c) => [
-                'id' => $c->id,
-                'name' => $c->name,
-                'logo' => $c->logo_url,
+                'id'       => $c->id,
+                'name'     => $c->name,
+                'logo'     => $c->logo_url,
                 'location' => $c->location,
-                'field' => $c->field_slug,
-                'rating' => (float)$c->rating,
-                'reviews' => $c->reviews,
+                'field'    => $c->field_slug,
+                'rating'   => (float) $c->rating,
+                'reviews'  => $c->reviews,
                 'workMode' => $c->work_mode,
                 'duration' => $c->duration,
-                'hours' => $c->hours,
+                'hours'    => $c->hours,
             ])
         );
     }
@@ -108,107 +110,117 @@ class InternshipMarketplaceController extends Controller
     {
         $user = $request->user();
 
-        $validated = $request->validate([
-            'company_id' => 'required|exists:internship_companies,id',
-            'start_date' => 'required|date',
-            'end_date'   => 'required|date|after:start_date',
-            'selected_services' => 'required|array|min:1',
-            'accepted_conditions' => 'required|array|min:1',
-            'cv' => 'required|mimes:pdf|max:5120', // 5MB
-        ]);
+        try {
+            // 1) Validate input
+            $validated = $request->validate([
+                'company_id'          => 'required|exists:internship_companies,id',
+                'start_date'          => 'required|date',
+                'end_date'            => 'required|date|after:start_date',
+                'selected_services'   => 'required|array|min:1',
+                'accepted_conditions' => 'required|array|min:1',
+                'cv'                  => 'required|mimes:pdf|max:5120', // 5MB
+            ]);
 
-        /* -----------------------
-         * Validate Dates
-         * ---------------------- */
-        $start = new \DateTime($validated['start_date']);
-        $end = new \DateTime($validated['end_date']);
-        $today = new \DateTime();
+            // 2) Validate dates
+            $start = new \DateTime($validated['start_date']);
+            $end   = new \DateTime($validated['end_date']);
+            $today = new \DateTime();
 
-        $minStart = (clone $today)->modify('+30 days');
+            $minStart = (clone $today)->modify('+30 days');
 
-        if ($start <= $today || $start < $minStart) {
-            return response()->json(['message' => 'Start date must be at least 30 days from today'], 422);
-        }
-
-        $months = ($end->format('Y') - $start->format('Y')) * 12 +
-                  ($end->format('m') - $start->format('m'));
-
-        if ($months < 3)
-            return response()->json(['message' => 'Internship must be at least 3 months'], 422);
-
-        if ($months > 12)
-            return response()->json(['message' => 'Internship cannot exceed 12 months'], 422);
-
-
-        /* -----------------------
-         * Validate Conditions
-         * ---------------------- */
-        $required = InternshipCondition::where('required', true)->pluck('slug')->toArray();
-
-        foreach ($required as $slug) {
-            if (!in_array($slug, $validated['accepted_conditions'])) {
-                return response()->json(['message' => 'All required conditions must be accepted'], 422);
+            if ($start <= $today || $start < $minStart) {
+                return response()->json([
+                    'message' => 'Start date must be at least 30 days from today',
+                ], 422);
             }
+
+            $months = ($end->format('Y') - $start->format('Y')) * 12 +
+                      ($end->format('m') - $start->format('m'));
+
+            if ($months < 3) {
+                return response()->json([
+                    'message' => 'Internship must be at least 3 months',
+                ], 422);
+            }
+
+            if ($months > 12) {
+                return response()->json([
+                    'message' => 'Internship cannot exceed 12 months',
+                ], 422);
+            }
+
+            // 3) Validate conditions
+            $required = InternshipCondition::where('required', true)->pluck('slug')->toArray();
+
+            foreach ($required as $slug) {
+                if (!in_array($slug, $validated['accepted_conditions'])) {
+                    return response()->json([
+                        'message' => 'All required conditions must be accepted',
+                    ], 422);
+                }
+            }
+
+            // 4) Calculate price
+            $services = InternshipService::whereIn('slug', $validated['selected_services'])->get();
+
+            if ($services->isEmpty()) {
+                return response()->json([
+                    'message' => 'Invalid services selected',
+                ], 422);
+            }
+
+            $totalPrice = $services->sum('price');
+
+            // 5) Store CV
+            $cvPath = $request->file('cv')->store('internship_cvs', 'public');
+
+            // 6) Stripe PaymentIntent
+            \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+
+            $paymentIntent = \Stripe\PaymentIntent::create([
+                'amount'   => (int) round($totalPrice * 100), // cents
+                'currency' => 'eur',
+                'metadata' => [
+                    'user_id'    => $user->id,
+                    'company_id' => $validated['company_id'],
+                ],
+            ]);
+
+            // 7) Save application
+            $application = InternshipApplication::create([
+                'user_id'                  => $user->id,
+                'company_id'               => $validated['company_id'],
+                'start_date'               => $validated['start_date'],
+                'end_date'                 => $validated['end_date'],
+                'duration_months'          => $months,
+                'selected_services'        => $validated['selected_services'],
+                'accepted_conditions'      => $validated['accepted_conditions'],
+                'cv_path'                  => $cvPath,
+                'total_price'              => $totalPrice,
+                'currency'                 => 'EUR',
+                'stripe_payment_intent_id' => $paymentIntent->id,
+                'status'                   => 'pending',
+            ]);
+
+            return response()->json([
+                'message'        => 'Application submitted',
+                'application_id' => $application->id,
+                'client_secret'  => $paymentIntent->client_secret,
+            ]);
+
+        } catch (\Throwable $e) {
+            Log::error('Internship apply error', [
+                'user_id' => $user?->id,
+                'error'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+
+            // During dev, expose the error message so you can see it in the browser
+            return response()->json([
+                'message' => 'Server error while processing application',
+                'error'   => $e->getMessage(),
+            ], 500);
         }
-
-
-        /* -----------------------
-         * Calculate Price
-         * ---------------------- */
-        $services = InternshipService::whereIn('slug', $validated['selected_services'])->get();
-
-        if ($services->isEmpty()) {
-            return response()->json(['message' => 'Invalid services selected'], 422);
-        }
-
-        $totalPrice = $services->sum('price');
-
-
-        /* -----------------------
-         * Store CV File
-         * ---------------------- */
-        $cvPath = $request->file('cv')->store('internship_cvs', 'public');
-
-
-        /* -----------------------
-         * Stripe PaymentIntent
-         * ---------------------- */
-        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
-
-        $paymentIntent = \Stripe\PaymentIntent::create([
-            'amount' => intval($totalPrice * 100), // cents
-            'currency' => 'eur',
-            'metadata' => [
-                'user_id' => $user->id,
-                'company_id' => $validated['company_id'],
-            ],
-        ]);
-
-
-        /* -----------------------
-         * Save Application
-         * ---------------------- */
-        $application = InternshipApplication::create([
-            'user_id' => $user->id,
-            'company_id' => $validated['company_id'],
-            'start_date' => $validated['start_date'],
-            'end_date' => $validated['end_date'],
-            'duration_months' => $months,
-            'selected_services' => $validated['selected_services'],
-            'accepted_conditions' => $validated['accepted_conditions'],
-            'cv_path' => $cvPath,
-            'total_price' => $totalPrice,
-            'currency' => 'EUR',
-            'stripe_payment_intent_id' => $paymentIntent->id,
-            'status' => 'pending',
-        ]);
-
-
-        return response()->json([
-            'message' => 'Application submitted',
-            'application_id' => $application->id,
-            'client_secret' => $paymentIntent->client_secret,
-        ]);
     }
 
     /* -----------------------
